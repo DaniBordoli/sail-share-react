@@ -48,9 +48,11 @@ export const Header = () => {
             <Button variant="ghost" size="sm" className="text-white hover:bg-white/20">
               <Heart size={18} />
             </Button>
-            <Button variant="ghost" size="sm" className="text-white hover:bg-white/20">
-              <User size={18} />
-              Entrar
+            <Button variant="ghost" size="sm" className="text-white hover:bg-white/20" asChild>
+              <a href="/profile">
+                <User size={18} />
+                Perfil
+              </a>
             </Button>
             <Button variant="hero" size="sm">
               Registrarse
