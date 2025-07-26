@@ -49,7 +49,7 @@ export const HeroSection = () => {
         <div className="text-center mb-12">
           <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight">
             Navega tus
-            <span className="bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent"> Sueños</span>
+            <span className="bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent"> Sueñosssss</span>
           </h1>
           <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed">
             Descubre más de 50,000 barcos y yates disponibles para alquiler en todo el mundo. 
