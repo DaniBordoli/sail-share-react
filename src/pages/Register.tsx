@@ -8,10 +8,83 @@ import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Anchor, Mail, Lock, User, Phone, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import type { RegisterData } from "@/types/api";
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    password: "",
+    confirmPassword: "",
+    acceptTerms: false,
+    newsletter: false
+  });
+  const navigate = useNavigate();
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [id]: value
+    }));
+  };
+
+  const handleCheckboxChange = (field: string) => (checked: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: checked
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      // Validaciones básicas
+      if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone || !formData.password) {
+        alert("Por favor, completa todos los campos requeridos");
+        return;
+      }
+
+      if (formData.password !== formData.confirmPassword) {
+        alert("Las contraseñas no coinciden");
+        return;
+      }
+
+      if (!formData.acceptTerms) {
+        alert("Debes aceptar los términos y condiciones");
+        return;
+      }
+
+      
+      const step1Data = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        password: formData.password,
+        newsletter: formData.newsletter
+      };
+
+      localStorage.setItem('registrationStep1Data', JSON.stringify(step1Data));
+      
+    
+      navigate("/register-step2");
+      
+    } catch (error) {
+      console.error("Error en validación:", error);
+      alert("Error en la validación. Por favor, inténtalo de nuevo.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-subtle">
@@ -35,7 +108,7 @@ const Register = () => {
             </CardHeader>
             
             <CardContent className="space-y-6">
-              <form className="space-y-4">
+              <form className="space-y-4" onSubmit={handleSubmit}>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
                     <Label htmlFor="firstName">Nombre</Label>
@@ -43,8 +116,11 @@ const Register = () => {
                       <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                       <Input
                         id="firstName"
+                        value={formData.firstName}
+                        onChange={handleInputChange}
                         placeholder="Carlos"
                         className="pl-10"
+                        required
                       />
                     </div>
                   </div>
@@ -52,7 +128,10 @@ const Register = () => {
                     <Label htmlFor="lastName">Apellido</Label>
                     <Input
                       id="lastName"
+                      value={formData.lastName}
+                      onChange={handleInputChange}
                       placeholder="Rodríguez"
+                      required
                     />
                   </div>
                 </div>
@@ -64,8 +143,11 @@ const Register = () => {
                     <Input
                       id="email"
                       type="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
                       placeholder="carlos@email.com"
                       className="pl-10"
+                      required
                     />
                   </div>
                 </div>
@@ -77,8 +159,11 @@ const Register = () => {
                     <Input
                       id="phone"
                       type="tel"
+                      value={formData.phone}
+                      onChange={handleInputChange}
                       placeholder="+34 666 777 888"
                       className="pl-10"
+                      required
                     />
                   </div>
                 </div>
@@ -90,8 +175,11 @@ const Register = () => {
                     <Input
                       id="password"
                       type={showPassword ? "text" : "password"}
+                      value={formData.password}
+                      onChange={handleInputChange}
                       placeholder="Mínimo 8 caracteres"
                       className="pl-10 pr-10"
+                      required
                     />
                     <button
                       type="button"
@@ -110,8 +198,11 @@ const Register = () => {
                     <Input
                       id="confirmPassword"
                       type={showConfirmPassword ? "text" : "password"}
+                      value={formData.confirmPassword}
+                      onChange={handleInputChange}
                       placeholder="Repite tu contraseña"
                       className="pl-10 pr-10"
+                      required
                     />
                     <button
                       type="button"
@@ -125,7 +216,12 @@ const Register = () => {
                 
                 <div className="space-y-3">
                   <div className="flex items-start space-x-2">
-                    <Checkbox id="terms" className="mt-1" />
+                    <Checkbox 
+                      id="terms" 
+                      className="mt-1" 
+                      checked={formData.acceptTerms}
+                      onCheckedChange={handleCheckboxChange("acceptTerms")}
+                    />
                     <label htmlFor="terms" className="text-sm text-muted-foreground leading-none">
                       Acepto los{" "}
                       <a href="#" className="text-primary hover:text-primary/80 font-medium">
@@ -139,15 +235,24 @@ const Register = () => {
                   </div>
                   
                   <div className="flex items-start space-x-2">
-                    <Checkbox id="newsletter" className="mt-1" />
+                    <Checkbox 
+                      id="newsletter" 
+                      className="mt-1" 
+                      checked={formData.newsletter}
+                      onCheckedChange={handleCheckboxChange("newsletter")}
+                    />
                     <label htmlFor="newsletter" className="text-sm text-muted-foreground leading-none">
                       Quiero recibir ofertas especiales y noticias por email
                     </label>
                   </div>
                 </div>
                 
-                <Button type="submit" className="w-full bg-gradient-ocean hover:opacity-90 transition-all">
-                  Crear Cuenta
+                <Button 
+                  type="submit" 
+                  className="w-full bg-gradient-ocean hover:opacity-90 transition-all"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Creando cuenta..." : "Crear Cuenta"}
                 </Button>
               </form>
               

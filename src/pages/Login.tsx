@@ -7,9 +7,61 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Anchor, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { loginUser } from "@/stores/slices/basicSlice";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    rememberMe: false
+  });
+  const navigate = useNavigate();
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value, type, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [id]: type === 'checkbox' ? checked : value
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+     
+      if (!formData.email || !formData.password) {
+        alert("Por favor, completa todos los campos");
+        return;
+      }
+
+      const response = await loginUser({
+        email: formData.email,
+        password: formData.password
+      });
+      
+      if (response.success) {
+       
+        if (formData.rememberMe) {
+          localStorage.setItem('userSession', JSON.stringify(response.data));
+        }
+        
+       
+        navigate("/");
+      } else {
+        alert(response.message || "Error al iniciar sesión");
+      }
+    } catch (error) {
+      console.error("Error en login:", error);
+      alert("Error al iniciar sesión. Por favor, verifica tus credenciales.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-subtle">
@@ -33,7 +85,7 @@ const Login = () => {
             </CardHeader>
             
             <CardContent className="space-y-6">
-              <form className="space-y-4">
+              <form className="space-y-4" onSubmit={handleSubmit}>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <div className="relative">
@@ -41,8 +93,11 @@ const Login = () => {
                     <Input
                       id="email"
                       type="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
                       placeholder="tu@email.com"
                       className="pl-10"
+                      required
                     />
                   </div>
                 </div>
@@ -54,8 +109,11 @@ const Login = () => {
                     <Input
                       id="password"
                       type={showPassword ? "text" : "password"}
+                      value={formData.password}
+                      onChange={handleInputChange}
                       placeholder="Tu contraseña"
                       className="pl-10 pr-10"
+                      required
                     />
                     <button
                       type="button"
@@ -69,7 +127,13 @@ const Login = () => {
                 
                 <div className="flex items-center justify-between text-sm">
                   <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" className="rounded border-gray-300" />
+                    <input 
+                      id="rememberMe"
+                      type="checkbox" 
+                      checked={formData.rememberMe}
+                      onChange={handleInputChange}
+                      className="rounded border-gray-300" 
+                    />
                     <span className="text-muted-foreground">Recordarme</span>
                   </label>
                   <a href="#" className="text-primary hover:text-primary/80 font-medium">
@@ -77,8 +141,12 @@ const Login = () => {
                   </a>
                 </div>
                 
-                <Button type="submit" className="w-full bg-gradient-ocean hover:opacity-90 transition-all">
-                  Iniciar Sesión
+                <Button 
+                  type="submit" 
+                  className="w-full bg-gradient-ocean hover:opacity-90 transition-all"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
                 </Button>
               </form>
               
