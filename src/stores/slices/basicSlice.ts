@@ -89,3 +89,104 @@ export const loginUser = async (credentials: LoginCredentials): Promise<ApiRespo
     throw error;
   }
 };
+
+
+export const loginWithGoogle = () => {
+  const popup = window.open(
+    `${API_BASE_URL}/api/auth/google`,
+    'googleLogin',
+    'width=500,height=600,scrollbars=yes,resizable=yes'
+  );
+
+  if (!popup) {
+    alert('El popup fue bloqueado. Por favor, permite popups para este sitio.');
+    return;
+  }
+
+
+  const handleMessage = (event: MessageEvent) => {
+    console.log('Mensaje recibido:', event.data);
+    
+    if (event.origin !== window.location.origin) {
+      console.log('Origen no válido:', event.origin);
+      return;
+    }
+    
+    if (event.data.type === 'GOOGLE_AUTH_SUCCESS' && event.data.token) {
+      console.log('Token recibido:', event.data.token);
+      
+
+      localStorage.setItem('authToken', event.data.token);
+      
+  
+      popup?.close();
+      
+   
+      window.location.href = '/';
+      
+
+      window.removeEventListener('message', handleMessage);
+    }
+  };
+
+  window.addEventListener('message', handleMessage);
+
+  const checkClosed = setInterval(() => {
+    if (popup?.closed) {
+      console.log('Popup cerrado manualmente');
+      window.removeEventListener('message', handleMessage);
+      clearInterval(checkClosed);
+    }
+  }, 1000);
+};
+
+
+export const loginWithFacebook = () => {
+  const popup = window.open(
+    `${API_BASE_URL}/api/auth/facebook`,
+    'facebookLogin',
+    'width=500,height=600,scrollbars=yes,resizable=yes'
+  );
+
+  if (!popup) {
+    alert('El popup fue bloqueado. Por favor, permite popups para este sitio.');
+    return;
+  }
+
+  
+  const handleMessage = (event: MessageEvent) => {
+    console.log('Mensaje de Facebook recibido:', event.data);
+    
+    if (event.origin !== window.location.origin) {
+      console.log('Origen no válido:', event.origin);
+      return;
+    }
+    
+    if (event.data.type === 'FACEBOOK_AUTH_SUCCESS' && event.data.token) {
+      console.log('Token de Facebook recibido:', event.data.token);
+      
+
+      localStorage.setItem('authToken', event.data.token);
+      
+ 
+      popup?.close();
+      
+  
+      window.location.href = '/';
+      
+ 
+      window.removeEventListener('message', handleMessage);
+    }
+  };
+
+  window.addEventListener('message', handleMessage);
+
+
+  const checkClosed = setInterval(() => {
+    if (popup?.closed) {
+      console.log('Popup de Facebook cerrado manualmente');
+      window.removeEventListener('message', handleMessage);
+      clearInterval(checkClosed);
+    }
+  }, 1000);
+};
