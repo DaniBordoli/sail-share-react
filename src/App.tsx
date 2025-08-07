@@ -8,6 +8,7 @@ import Profile from "./pages/Profile";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import RegisterStep2 from "./pages/RegisterStep2";
+import AuthSuccess from "./pages/AuthSuccess";
 import ListYourBoat from "./pages/ListYourBoat";
 import NotFound from "./pages/NotFound";
 
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/register-step2" element={<RegisterStep2 />} />
+          <Route path="/auth/success" element={<AuthSuccess />} />
           <Route path="/list-your-boat" element={<ListYourBoat />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
