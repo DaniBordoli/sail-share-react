@@ -10,6 +10,7 @@ import { Upload, FileText, UserCheck } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { createUser } from "@/stores/slices/basicSlice";
+import { useToast } from "@/hooks/use-toast";
 import type { UserData, RegisterData, RegistrationStep2Data } from "@/types/api";
 
 const RegisterStep2 = () => {
@@ -22,6 +23,7 @@ const RegisterStep2 = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [step1Data, setStep1Data] = useState<any>(null);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     
@@ -60,7 +62,7 @@ const RegisterStep2 = () => {
 
     try {
       if (!step1Data) {
-        alert("Error: No se encontraron datos del primer paso");
+        toast({ title: 'Datos incompletos', description: 'No se encontraron datos del primer paso.', variant: 'destructive' });
         navigate('/register');
         return;
       }
@@ -79,19 +81,15 @@ const RegisterStep2 = () => {
       const response = await createUser(completeUserData);
       
       if (response.success) {
-        
         localStorage.removeItem('registrationStep1Data');
-        
-     
-        alert("¡Registro completado exitosamente!");
-        navigate('/login');
+        navigate('/register-email-sent');
       } else {
-        alert(response.message || "Error al completar el registro");
+        toast({ title: 'No se pudo completar el registro', description: response.message || 'Intenta nuevamente.', variant: 'destructive' });
       }
       
     } catch (error) {
       console.error("Error completando registro:", error);
-      alert("Error al completar el registro. Por favor, inténtalo de nuevo.");
+      toast({ title: 'Error de red', description: 'Intenta nuevamente.', variant: 'destructive' });
     } finally {
       setIsLoading(false);
     }

@@ -1,21 +1,46 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, Anchor, User, Heart, Search } from "lucide-react";
+import { Link } from "react-router-dom";
+import { logout } from "@/stores/slices/basicSlice";
 
 export const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const navigation = [
-    { name: "Inicio", href: "#" },
+    { name: "Inicio", href: "/" },
     { name: "Buscar Barcos", href: "#" },
     { name: "Destinos", href: "#" },
     { name: "Alquila tu Barco", href: "/list-your-boat" },
     { name: "Ayuda", href: "#" }
   ];
 
+  const [isAuth, setIsAuth] = useState<boolean>(false);
+
+  useEffect(() => {
+    const check = () => setIsAuth(!!localStorage.getItem('authToken'));
+    check();
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === 'authToken') check();
+    };
+    window.addEventListener('storage', onStorage);
+    window.addEventListener('focus', check);
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener('focus', check);
+    };
+  }, []);
+
+  const handleLogout = async () => {
+    await logout();
+    setIsAuth(false);
+    // Navegar a inicio
+    window.location.href = '/';
+  };
+
   return (
-    <header className="absolute top-0 left-0 right-0 z-50 bg-white/10 backdrop-blur-md border-b border-white/20">
+    <header className="fixed top-0 left-0 right-0 z-[60] bg-white/10 backdrop-blur-md border-b border-white/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
@@ -32,14 +57,14 @@ export const Header = () => {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
             {navigation.map((item) => (
-              <a
+              <Link
                 key={item.name}
-                href={item.href}
+                to={item.href}
                 className="text-white/90 hover:text-white text-sm font-medium transition-colors duration-300 relative group"
               >
                 {item.name}
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
-              </a>
+              </Link>
             ))}
           </nav>
 
@@ -48,15 +73,28 @@ export const Header = () => {
             <Button variant="ghost" size="sm" className="text-white hover:bg-white/20">
               <Heart size={18} />
             </Button>
-            <Button variant="ghost" size="sm" className="text-white hover:bg-white/20" asChild>
-              <a href="/profile">
-                <User size={18} />
-                Perfil
-              </a>
-            </Button>
-            <Button variant="hero" size="sm">
-              Registrarse
-            </Button>
+            {isAuth ? (
+              <>
+                <Button variant="ghost" size="sm" className="text-white hover:bg-white/20" asChild>
+                  <Link to="/profile">
+                    <User size={18} />
+                    Perfil
+                  </Link>
+                </Button>
+                <Button variant="ghost" size="sm" className="text-white hover:bg-white/20" onClick={handleLogout}>
+                  Cerrar sesión
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" size="sm" className="text-white hover:bg-white/20" asChild>
+                  <Link to="/login">Iniciar Sesión</Link>
+                </Button>
+                <Button variant="hero" size="sm" asChild>
+                  <Link to="/register">Registrarse</Link>
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -82,14 +120,14 @@ export const Header = () => {
                 {/* Mobile Navigation */}
                 <nav className="flex flex-col space-y-4">
                   {navigation.map((item) => (
-                    <a
+                    <Link
                       key={item.name}
-                      href={item.href}
+                      to={item.href}
                       className="text-foreground hover:text-primary text-base font-medium transition-colors"
                       onClick={() => setIsOpen(false)}
                     >
                       {item.name}
-                    </a>
+                    </Link>
                   ))}
                 </nav>
 
@@ -99,13 +137,31 @@ export const Header = () => {
                     <Heart size={18} />
                     Favoritos
                   </Button>
-                  <Button variant="outline" className="w-full justify-start gap-2">
-                    <User size={18} />
-                    Iniciar Sesión
-                  </Button>
-                  <Button variant="ocean" className="w-full">
-                    Registrarse
-                  </Button>
+                  {isAuth ? (
+                    <>
+                      <Button variant="outline" className="w-full justify-start gap-2" asChild onClick={() => setIsOpen(false)}>
+                        <Link to="/profile">
+                          <User size={18} />
+                          Mi Perfil
+                        </Link>
+                      </Button>
+                      <Button variant="ocean" className="w-full" onClick={() => { setIsOpen(false); handleLogout(); }}>
+                        Cerrar sesión
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button variant="outline" className="w-full justify-start gap-2" asChild onClick={() => setIsOpen(false)}>
+                        <Link to="/login">
+                          <User size={18} />
+                          Iniciar Sesión
+                        </Link>
+                      </Button>
+                      <Button variant="ocean" className="w-full" asChild onClick={() => setIsOpen(false)}>
+                        <Link to="/register">Registrarse</Link>
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
             </SheetContent>
