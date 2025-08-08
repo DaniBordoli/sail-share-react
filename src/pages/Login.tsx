@@ -8,17 +8,23 @@ import { Separator } from "@/components/ui/separator";
 import { Anchor, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { loginUser, loginWithGoogle, loginWithFacebook } from "@/stores/slices/basicSlice";
+import { loginUser, loginWithGoogle, loginWithFacebook, resendVerificationEmail } from "@/stores/slices/basicSlice";
+import { useToast } from "@/hooks/use-toast";
+import heroImage from "@/assets/hero-yacht.jpg";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [verifyNeeded, setVerifyNeeded] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendMessage, setResendMessage] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     rememberMe: false
   });
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value, type, checked } = e.target;
@@ -28,14 +34,33 @@ const Login = () => {
     }));
   };
 
+  const handleResendVerification = async () => {
+    if (!formData.email) {
+      toast({ title: 'Ingresa tu email', description: 'Necesitamos tu email para reenviar la verificación.', variant: 'destructive' });
+      return;
+    }
+    setResendLoading(true);
+    setResendMessage(null);
+    try {
+      const res = await resendVerificationEmail(formData.email);
+      setResendMessage(res.message || 'Correo de verificación reenviado.');
+    } catch (e) {
+      setResendMessage('No se pudo reenviar el correo. Intenta nuevamente.');
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setVerifyNeeded(false);
+    setResendMessage(null);
 
     try {
      
       if (!formData.email || !formData.password) {
-        alert("Por favor, completa todos los campos");
+        toast({ title: 'Campos incompletos', description: 'Completa email y contraseña.', variant: 'destructive' });
         return;
       }
 
@@ -53,21 +78,41 @@ const Login = () => {
        
         navigate("/");
       } else {
-        alert(response.message || "Error al iniciar sesión");
+        if (response.code === 'EMAIL_NOT_VERIFIED') {
+          setVerifyNeeded(true);
+        } else {
+          toast({ title: 'No se pudo iniciar sesión', description: response.message || 'Intenta nuevamente.', variant: 'destructive' });
+        }
       }
     } catch (error) {
       console.error("Error en login:", error);
-      alert("Error al iniciar sesión. Por favor, verifica tus credenciales.");
+      toast({ title: 'Error de red', description: 'No se pudo iniciar sesión. Intenta nuevamente.', variant: 'destructive' });
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-subtle">
-      <Header />
+    <div className="relative min-h-screen isolate">
+      {/* Background */}
+      <div 
+        className="absolute inset-0 z-0 pointer-events-none select-none"
+        style={{
+          backgroundImage: `url(${heroImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}
+      >
+        <div className="absolute inset-0 bg-gradient-hero opacity-60 pointer-events-none"></div>
+        <div className="absolute inset-0 bg-black/20 pointer-events-none"></div>
+      </div>
+
+      <div className="relative z-50 pointer-events-auto">
+        <Header />
+      </div>
       
-      <div className="pt-24 pb-16">
+      <div className="pt-24 pb-16 relative z-10">
         <div className="max-w-md mx-auto px-4">
           <Card className="shadow-elegant border-0">
             <CardHeader className="text-center space-y-4">
@@ -85,6 +130,23 @@ const Login = () => {
             </CardHeader>
             
             <CardContent className="space-y-6">
+              {verifyNeeded && (
+                <div className="rounded-md border border-yellow-300 bg-yellow-50 text-yellow-800 p-3 text-sm">
+                  <p className="mb-2">Debes verificar tu correo antes de iniciar sesión.</p>
+                  <div className="flex items-center gap-3">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="border-yellow-400 text-yellow-800 hover:bg-yellow-100"
+                      onClick={handleResendVerification}
+                      disabled={resendLoading}
+                    >
+                      {resendLoading ? 'Enviando…' : 'Reenviar verificación'}
+                    </Button>
+                    {resendMessage && <span className="text-xs text-yellow-700">{resendMessage}</span>}
+                  </div>
+                </div>
+              )}
               <form className="space-y-4" onSubmit={handleSubmit}>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
@@ -196,7 +258,9 @@ const Login = () => {
         </div>
       </div>
       
-      <Footer />
+      <div className="relative z-10">
+        <Footer />
+      </div>
     </div>
   );
 };

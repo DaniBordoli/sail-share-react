@@ -9,6 +9,10 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import RegisterStep2 from "./pages/RegisterStep2";
 import AuthSuccess from "./pages/AuthSuccess";
+import VerifyEmailSuccess from "./pages/VerifyEmailSuccess";
+import VerifyEmailHandler from "./pages/VerifyEmailHandler";
+import VerifyEmailError from "./pages/VerifyEmailError";
+import RegisterEmailSent from "./pages/RegisterEmailSent";
 import ListYourBoat from "./pages/ListYourBoat";
 import NotFound from "./pages/NotFound";
 
@@ -27,6 +31,10 @@ const App = () => (
           <Route path="/register" element={<Register />} />
           <Route path="/register-step2" element={<RegisterStep2 />} />
           <Route path="/auth/success" element={<AuthSuccess />} />
+          <Route path="/verify-email" element={<VerifyEmailHandler />} />
+          <Route path="/verify-email/success" element={<VerifyEmailSuccess />} />
+          <Route path="/verify-email/error" element={<VerifyEmailError />} />
+          <Route path="/register-email-sent" element={<RegisterEmailSent />} />
           <Route path="/list-your-boat" element={<ListYourBoat />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

@@ -11,6 +11,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { RegisterData } from "@/types/api";
 import { loginWithGoogle, loginWithFacebook } from "@/stores/slices/basicSlice";
+import { useToast } from "@/hooks/use-toast";
+import heroImage from "@/assets/hero-yacht.jpg";
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -27,6 +29,7 @@ const Register = () => {
     newsletter: false
   });
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -50,17 +53,17 @@ const Register = () => {
     try {
       // Validaciones básicas
       if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone || !formData.password) {
-        alert("Por favor, completa todos los campos requeridos");
+        toast({ title: 'Campos incompletos', description: 'Completa todos los campos requeridos.', variant: 'destructive' });
         return;
       }
 
       if (formData.password !== formData.confirmPassword) {
-        alert("Las contraseñas no coinciden");
+        toast({ title: 'Contraseñas distintas', description: 'Asegúrate de que coincidan.', variant: 'destructive' });
         return;
       }
 
       if (!formData.acceptTerms) {
-        alert("Debes aceptar los términos y condiciones");
+        toast({ title: 'Falta aceptar términos', description: 'Debes aceptar los términos y condiciones.', variant: 'destructive' });
         return;
       }
 
@@ -81,17 +84,33 @@ const Register = () => {
       
     } catch (error) {
       console.error("Error en validación:", error);
-      alert("Error en la validación. Por favor, inténtalo de nuevo.");
+      toast({ title: 'Error de validación', description: 'Inténtalo nuevamente.', variant: 'destructive' });
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-subtle">
-      <Header />
+    <div className="relative min-h-screen isolate">
+      {/* Background */}
+      <div 
+        className="absolute inset-0 z-0 pointer-events-none select-none"
+        style={{
+          backgroundImage: `url(${heroImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}
+      >
+        <div className="absolute inset-0 bg-gradient-hero opacity-60 pointer-events-none"></div>
+        <div className="absolute inset-0 bg-black/20 pointer-events-none"></div>
+      </div>
+
+      <div className="relative z-50 pointer-events-auto">
+        <Header />
+      </div>
       
-      <div className="pt-24 pb-16">
+      <div className="pt-24 pb-16 relative z-10">
         <div className="max-w-md mx-auto px-4">
           <Card className="shadow-elegant border-0">
             <CardHeader className="text-center space-y-4">
@@ -109,6 +128,12 @@ const Register = () => {
             </CardHeader>
             
             <CardContent className="space-y-6">
+              <div className="rounded-md border border-blue-300 bg-blue-50 text-blue-800 p-3 text-sm">
+                <p>
+                  Al registrarte con email, te enviaremos un <strong>correo de verificación</strong>. 
+                  Debes <strong>verificar tu cuenta</strong> para poder iniciar sesión.
+                </p>
+              </div>
               <form className="space-y-4" onSubmit={handleSubmit}>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-2">
@@ -298,7 +323,9 @@ const Register = () => {
         </div>
       </div>
       
-      <Footer />
+      <div className="relative z-10">
+        <Footer />
+      </div>
     </div>
   );
 };
