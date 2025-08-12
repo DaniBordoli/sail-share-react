@@ -161,13 +161,23 @@ const RegisterStep2 = () => {
                   )}
                 </div>
 
-                <Button 
-                  type="submit" 
-                  className="w-full bg-gradient-ocean hover:opacity-90 transition-all"
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Completando registro..." : "Continuar"}
-                </Button>
+                <div className="flex gap-3">
+                  <Button 
+                    type="submit"
+                    variant="outline"
+                    className="w-full"
+                    disabled={isLoading}
+                  >
+                    Omitir
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-gradient-ocean hover:opacity-90 transition-all"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "Completando registro..." : "Continuar"}
+                  </Button>
+                </div>
               </form>
               <div className="relative">
                 <Separator />

@@ -38,7 +38,7 @@ const VerifyEmailSuccess = () => {
             </div>
             <h1 className="text-2xl font-bold mb-2">¡Email verificado!</h1>
             <p className="text-muted-foreground mb-6">
-              Tu cuenta ha sido activada correctamente. Ya puedes iniciar sesión para comenzar tu aventura en NavBoat.
+              Tu cuenta ha sido activada correctamente. Ya puedes iniciar sesión para comenzar tu aventura en boatbnb.
             </p>
             <div className="flex justify-center">
               <Button onClick={() => navigate('/login')} className="bg-gradient-ocean hover:opacity-90">
