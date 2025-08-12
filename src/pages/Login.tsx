@@ -70,12 +70,12 @@ const Login = () => {
       });
       
       if (response.success) {
-       
+        if (response.token) {
+          localStorage.setItem('authToken', response.token);
+        }
         if (formData.rememberMe) {
           localStorage.setItem('userSession', JSON.stringify(response.data));
         }
-        
-       
         navigate("/");
       } else {
         if (response.code === 'EMAIL_NOT_VERIFIED') {
@@ -124,7 +124,7 @@ const Login = () => {
               <div>
                 <CardTitle className="text-2xl font-bold">Iniciar Sesión</CardTitle>
                 <p className="text-muted-foreground mt-2">
-                  Accede a tu cuenta de NavBoat
+                  Accede a tu cuenta de boatbnb
                 </p>
               </div>
             </CardHeader>

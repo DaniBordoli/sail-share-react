@@ -4,6 +4,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, Anchor, User, Heart, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import { logout } from "@/stores/slices/basicSlice";
+import boatbnbLogo from "@/assets/logos/boatbnb-logo.png";
 
 export const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -46,10 +47,10 @@ export const Header = () => {
           {/* Logo */}
           <div className="flex items-center gap-3">
             <div className="p-2 bg-white/20 rounded-lg">
-              <Anchor className="h-8 w-8 text-white" />
+              <img src={boatbnbLogo} alt="BoatBnB Logo" className="h-8 w-8 object-contain" />
             </div>
             <div className="text-white">
-              <h1 className="text-2xl font-bold tracking-tight">NavBoat</h1>
+              <h1 className="text-2xl font-bold tracking-tight brand-title">boatbnb</h1>
               <p className="text-xs text-white/80">Tu aventura náutica</p>
             </div>
           </div>
@@ -109,10 +110,10 @@ export const Header = () => {
                 {/* Mobile Logo */}
                 <div className="flex items-center gap-3 pb-6 border-b">
                   <div className="p-2 bg-primary/10 rounded-lg">
-                    <Anchor className="h-6 w-6 text-primary" />
+                    <img src={boatbnbLogo} alt="BoatBnB Logo" className="h-6 w-6 object-contain" />
                   </div>
                   <div>
-                    <h1 className="text-xl font-bold text-foreground">NavBoat</h1>
+                    <h1 className="text-xl font-bold text-foreground brand-title">boatbnb</h1>
                     <p className="text-xs text-muted-foreground">Tu aventura náutica</p>
                   </div>
                 </div>
