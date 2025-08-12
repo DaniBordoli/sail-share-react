@@ -70,11 +70,12 @@ const Login = () => {
       });
       
       if (response.success) {
-        if (response.token) {
-          localStorage.setItem('authToken', response.token);
+        const token = (response as any)?.token ?? ((response as any)?.data?.token);
+        if (token) {
+          localStorage.setItem('authToken', token);
         }
         if (formData.rememberMe) {
-          localStorage.setItem('userSession', JSON.stringify(response.data));
+          localStorage.setItem('userSession', JSON.stringify((response as any).data ?? null));
         }
         navigate("/");
       } else {
