@@ -121,15 +121,13 @@ const SearchBoats = () => {
         </header>
 
         <section className="max-w-7xl mx-auto px-4">
-          {isLoading && (
+          {isLoading ? (
             <p className="text-white/90">Cargando embarcaciones…</p>
-          )}
-          {isError && (
-            <p className="text-red-100">No se pudieron cargar los barcos. Intenta nuevamente.</p>
-          )}
-
-          {!isLoading && !isError && (
+          ) : (
             <>
+              {isError && (
+                <p className="mb-3 text-yellow-100">No se pudo conectar con la API. Mostrando barcos de demostración.</p>
+              )}
               <p className="text-white/90 mb-4">{filtered.length} resultados</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filtered.map((boat) => (
