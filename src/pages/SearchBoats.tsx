@@ -8,6 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getBoats } from "@/stores/slices/basicSlice";
 import { MapPin, Star, Users, Ship } from "lucide-react";
 import heroImage from "@/assets/hero-yacht.jpg";
+import { mockBoats } from "@/data/mockBoats";
 
 interface Boat {
   _id?: string;
@@ -58,18 +59,19 @@ const SearchBoats = () => {
   });
 
   const boats: Boat[] = (data?.data as any) || (Array.isArray(data) ? data : []) || [];
+  const effectiveBoats: Boat[] = boats && boats.length ? boats : (mockBoats as Boat[]);
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim();
-    if (!q) return boats;
-    return boats.filter((b) => {
+    if (!q) return effectiveBoats;
+    return effectiveBoats.filter((b) => {
       const parts = [b.name, b.title, b.location, b.city, b.country, b.type]
         .filter(Boolean)
         .join(" ")
         .toLowerCase();
       return parts.includes(q);
     });
-  }, [boats, query]);
+  }, [effectiveBoats, query]);
 
   const getImg = (b: Boat) => b.imageUrl || b.image || b.photos?.[0] || "/placeholder.svg";
   const getId = (b: Boat) => (b._id || b.id || Math.random().toString());
