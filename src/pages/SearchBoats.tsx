@@ -9,6 +9,7 @@ import { getBoats } from "@/stores/slices/basicSlice";
 import { MapPin, Star, Users, Ship } from "lucide-react";
 import heroImage from "@/assets/hero-yacht.jpg";
 import { mockBoats } from "@/data/mockBoats";
+import { Link } from "react-router-dom";
 
 interface Boat {
   _id?: string;
@@ -133,14 +134,16 @@ const SearchBoats = () => {
                 {filtered.map((boat) => (
                   <article key={getId(boat)} className="group">
                     <Card variant="floating" className="overflow-hidden">
-                      <div className="aspect-video w-full overflow-hidden">
-                        <img
-                          src={getImg(boat)}
-                          alt={`${getName(boat)} en ${getLocation(boat)} - alquiler de barcos`}
-                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          loading="lazy"
-                        />
-                      </div>
+                        <div className="aspect-video w-full overflow-hidden">
+                          <Link to={`/barcos/${getId(boat)}`}>
+                            <img
+                              src={getImg(boat)}
+                              alt={`${getName(boat)} en ${getLocation(boat)} - alquiler de barcos`}
+                              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                              loading="lazy"
+                            />
+                          </Link>
+                        </div>
                       <CardHeader>
                         <CardTitle className="flex items-center justify-between">
                           <span>{getName(boat)}</span>
@@ -167,7 +170,9 @@ const SearchBoats = () => {
                           <span className="font-semibold">{boat.price ? `$${boat.price}` : "Consultar"}</span>{" "}
                           <span className="text-muted-foreground">/ día</span>
                         </div>
-                        <Button variant="ocean" size="sm">Ver detalles</Button>
+                        <Button variant="ocean" size="sm" asChild>
+                          <Link to={`/barcos/${getId(boat)}`}>Ver detalles</Link>
+                        </Button>
                       </CardFooter>
                     </Card>
                   </article>
