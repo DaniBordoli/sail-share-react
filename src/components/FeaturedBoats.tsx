@@ -3,6 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Star, Users, Anchor, MapPin, Calendar, Heart } from "lucide-react";
 import { useState } from "react";
+import boat1 from "@/assets/boats/boat-1.jpg";
+import boat2 from "@/assets/boats/boat-2.jpg";
+import boat3 from "@/assets/boats/boat-3.jpg";
+import boat4 from "@/assets/boats/boat-4.jpg";
 
 interface Boat {
   id: number;
@@ -31,7 +35,7 @@ const featuredBoats: Boat[] = [
     capacity: 12,
     length: "20m",
     type: "Yate de lujo",
-    image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800&h=600&fit=crop",
+    image: boat1,
     features: ["Capitán incluido", "Aire acondicionado", "Wifi", "Cocina completa"],
     isNew: true
   },
@@ -45,7 +49,7 @@ const featuredBoats: Boat[] = [
     capacity: 8,
     length: "14.6m",
     type: "Velero",
-    image: "https://images.unsplash.com/photo-1540946485063-a40da27545f8?w=800&h=600&fit=crop",
+    image: boat2,
     features: ["Sin licencia", "Velas nuevas", "GPS", "Nevera"],
     discount: 15
   },
@@ -59,7 +63,7 @@ const featuredBoats: Boat[] = [
     capacity: 10,
     length: "17m",
     type: "Yate deportivo",
-    image: "https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?w=800&h=600&fit=crop",
+    image: boat3,
     features: ["Jet ski incluido", "Patrón profesional", "Bar", "Solarium"]
   },
   {
@@ -72,7 +76,7 @@ const featuredBoats: Boat[] = [
     capacity: 12,
     length: "13.96m",
     type: "Catamarán",
-    image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop",
+    image: boat4,
     features: ["Estable", "Amplios espacios", "Ducha exterior", "Snorkel"]
   }
 ];
