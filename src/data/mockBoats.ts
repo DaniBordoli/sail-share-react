@@ -1,3 +1,14 @@
+import boat1 from "@/assets/boats/boat-1.jpg";
+import boat2 from "@/assets/boats/boat-2.jpg";
+import boat3 from "@/assets/boats/boat-3.jpg";
+import boat4 from "@/assets/boats/boat-4.jpg";
+import boat5 from "@/assets/boats/boat-5.jpg";
+import boat6 from "@/assets/boats/boat-6.jpeg";
+import boat7 from "@/assets/boats/boat-7.jpg";
+import heroImage from "@/assets/hero-yacht.jpg";
+
+const imgs = [boat1, boat2, boat3, boat4, boat5, boat6, boat7, heroImage];
+
 export const mockBoats = [
   {
     id: 1,
@@ -8,7 +19,7 @@ export const mockBoats = [
     price: 320,
     rating: 4.8,
     capacity: 8,
-    imageUrl: "https://images.unsplash.com/photo-1520466809213-7b9a56adcd45?q=80&w=1200&auto=format&fit=crop",
+    imageUrl: imgs[0],
     type: "Velero"
   },
   {
@@ -20,7 +31,7 @@ export const mockBoats = [
     price: 450,
     rating: 4.6,
     capacity: 10,
-    imageUrl: "https://images.unsplash.com/photo-1494423508883-2d95a2e402c3?q=80&w=1200&auto=format&fit=crop",
+    imageUrl: imgs[1],
     type: "Catamarán"
   },
   {
@@ -32,7 +43,7 @@ export const mockBoats = [
     price: 980,
     rating: 4.9,
     capacity: 12,
-    imageUrl: "https://images.unsplash.com/photo-1521207418485-99c705420785?q=80&w=1200&auto=format&fit=crop",
+    imageUrl: imgs[2],
     type: "Yate"
   },
   {
@@ -44,7 +55,7 @@ export const mockBoats = [
     price: 220,
     rating: 4.4,
     capacity: 6,
-    imageUrl: "https://images.unsplash.com/photo-1516321060213-1f41b48e9a02?q=80&w=1200&auto=format&fit=crop",
+    imageUrl: imgs[3],
     type: "Lancha"
   },
   {
@@ -56,7 +67,7 @@ export const mockBoats = [
     price: 540,
     rating: 4.7,
     capacity: 16,
-    imageUrl: "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?q=80&w=1200&auto=format&fit=crop",
+    imageUrl: imgs[4],
     type: "Goleta"
   },
   {
@@ -68,7 +79,7 @@ export const mockBoats = [
     price: 300,
     rating: 4.5,
     capacity: 8,
-    imageUrl: "https://images.unsplash.com/photo-1483683804023-6ccdb62f86ef?q=80&w=1200&auto=format&fit=crop",
+    imageUrl: imgs[5 % imgs.length],
     type: "Velero"
   },
   {
@@ -80,7 +91,7 @@ export const mockBoats = [
     price: 480,
     rating: 4.6,
     capacity: 12,
-    imageUrl: "https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?q=80&w=1200&auto=format&fit=crop",
+    imageUrl: imgs[6 % imgs.length],
     type: "Catamarán"
   },
   {
@@ -92,7 +103,7 @@ export const mockBoats = [
     price: 1100,
     rating: 5.0,
     capacity: 14,
-    imageUrl: "https://images.unsplash.com/photo-1500462918059-b1a0cb512f1d?q=80&w=1200&auto=format&fit=crop",
+    imageUrl: imgs[7 % imgs.length],
     type: "Yate"
   },
   {
@@ -104,7 +115,7 @@ export const mockBoats = [
     price: 210,
     rating: 4.3,
     capacity: 6,
-    imageUrl: "https://images.unsplash.com/photo-1500367215255-0e0b25b396af?q=80&w=1200&auto=format&fit=crop",
+    imageUrl: imgs[8 % imgs.length],
     type: "Lancha"
   },
   {
@@ -116,7 +127,7 @@ export const mockBoats = [
     price: 560,
     rating: 4.7,
     capacity: 18,
-    imageUrl: "https://images.unsplash.com/photo-1497016512210-81f53e313639?q=80&w=1200&auto=format&fit=crop",
+    imageUrl: imgs[9 % imgs.length],
     type: "Goleta"
   },
   {
@@ -128,7 +139,7 @@ export const mockBoats = [
     price: 340,
     rating: 4.5,
     capacity: 9,
-    imageUrl: "https://images.unsplash.com/photo-1494403687614-8ca3e13f1542?q=80&w=1200&auto=format&fit=crop",
+    imageUrl: imgs[10 % imgs.length],
     type: "Velero"
   },
   {
@@ -140,7 +151,7 @@ export const mockBoats = [
     price: 500,
     rating: 4.6,
     capacity: 10,
-    imageUrl: "https://images.unsplash.com/photo-1463511045827-1df7f5521fae?q=80&w=1200&auto=format&fit=crop",
+    imageUrl: imgs[11 % imgs.length],
     type: "Catamarán"
   },
   {
@@ -152,7 +163,7 @@ export const mockBoats = [
     price: 1200,
     rating: 4.9,
     capacity: 12,
-    imageUrl: "https://images.unsplash.com/photo-1445471216689-7c05b5434173?q=80&w=1200&auto=format&fit=crop",
+    imageUrl: imgs[12 % imgs.length],
     type: "Yate"
   },
   {
@@ -164,7 +175,7 @@ export const mockBoats = [
     price: 190,
     rating: 4.2,
     capacity: 5,
-    imageUrl: "https://images.unsplash.com/photo-1472289065668-ce650ac443d2?q=80&w=1200&auto=format&fit=crop",
+    imageUrl: imgs[13 % imgs.length],
     type: "Lancha"
   },
   {
@@ -176,7 +187,7 @@ export const mockBoats = [
     price: 600,
     rating: 4.8,
     capacity: 20,
-    imageUrl: "https://images.unsplash.com/photo-1544551763-7ef03864b649?q=80&w=1200&auto=format&fit=crop",
+    imageUrl: imgs[14 % imgs.length],
     type: "Goleta"
   },
   {
@@ -188,7 +199,7 @@ export const mockBoats = [
     price: 360,
     rating: 4.5,
     capacity: 8,
-    imageUrl: "https://images.unsplash.com/photo-1456305951335-bb8134aeab8a?q=80&w=1200&auto=format&fit=crop",
+    imageUrl: imgs[15 % imgs.length],
     type: "Velero"
   },
   {
@@ -200,7 +211,7 @@ export const mockBoats = [
     price: 520,
     rating: 4.6,
     capacity: 12,
-    imageUrl: "https://images.unsplash.com/photo-1491406213019-05b162a93122?q=80&w=1200&auto=format&fit=crop",
+    imageUrl: imgs[16 % imgs.length],
     type: "Catamarán"
   },
   {
@@ -212,7 +223,7 @@ export const mockBoats = [
     price: 1300,
     rating: 5.0,
     capacity: 14,
-    imageUrl: "https://images.unsplash.com/photo-1472586662442-3eec04b9dbda?q=80&w=1200&auto=format&fit=crop",
+    imageUrl: imgs[17 % imgs.length],
     type: "Yate"
   },
   {
@@ -224,7 +235,7 @@ export const mockBoats = [
     price: 200,
     rating: 4.1,
     capacity: 6,
-    imageUrl: "https://images.unsplash.com/photo-1523642595781-2609ff3dc8ef?q=80&w=1200&auto=format&fit=crop",
+    imageUrl: imgs[18 % imgs.length],
     type: "Lancha"
   },
   {
@@ -236,7 +247,7 @@ export const mockBoats = [
     price: 620,
     rating: 4.7,
     capacity: 18,
-    imageUrl: "https://images.unsplash.com/photo-1468413253725-0d5181091126?q=80&w=1200&auto=format&fit=crop",
+    imageUrl: imgs[19 % imgs.length],
     type: "Goleta"
   }
 ];

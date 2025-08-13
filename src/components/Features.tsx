@@ -42,7 +42,7 @@ export const Features = () => {
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 text-primary mb-4">
             <Shield size={24} />
-            <span className="text-sm font-semibold uppercase tracking-wider">¿Por qué NavBoat?</span>
+            <span className="text-sm font-semibold uppercase tracking-wider">¿Por qué boatbnb?</span>
           </div>
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
             Navega con Confianza

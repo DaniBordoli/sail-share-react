@@ -94,7 +94,7 @@ const Profile = () => {
       {/* Profile Hero Section */}
       <div className="pt-20 pb-8 bg-gradient-ocean">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row items-start gap-6">
+          <div className="flex flex-col md:flex-row items-start gap-6 pt-8">
             <Avatar className="h-32 w-32 border-4 border-white shadow-lg">
               <AvatarImage src={userProfile.avatar} alt={userProfile.name} />
               <AvatarFallback className="text-2xl font-bold bg-white text-primary">

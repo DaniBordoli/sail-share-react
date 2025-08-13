@@ -122,7 +122,7 @@ const Register = () => {
               <div>
                 <CardTitle className="text-2xl font-bold">Crear Cuenta</CardTitle>
                 <p className="text-muted-foreground mt-2">
-                  Únete a la comunidad náutica de NavBoat
+                  Únete a la comunidad náutica de boatbnb
                 </p>
               </div>
             </CardHeader>

@@ -110,7 +110,7 @@ const RegisterStep2 = () => {
               <div>
                 <CardTitle className="text-2xl font-bold">Verificación y Experiencia</CardTitle>
                 <p className="text-muted-foreground mt-2">
-                  Completa tu perfil para navegar con NavBoat
+                  Completa tu perfil para navegar con boatbnb
                 </p>
               </div>
             </CardHeader>
