@@ -10,6 +10,7 @@ import { MapPin, Star, Users, Ship } from "lucide-react";
 import heroImage from "@/assets/hero-yacht.jpg";
 import { mockBoats } from "@/data/mockBoats";
 import { Link } from "react-router-dom";
+import boatPlaceholder from "@/assets/hero-yacht.jpg";
 
 interface Boat {
   _id?: string;
@@ -74,7 +75,7 @@ const SearchBoats = () => {
     });
   }, [effectiveBoats, query]);
 
-  const getImg = (b: Boat) => b.imageUrl || b.image || b.photos?.[0] || "/placeholder.svg";
+  const getImg = (b: Boat) => b.imageUrl || b.image || b.photos?.[0] || boatPlaceholder;
   const getId = (b: Boat) => (b._id || b.id || Math.random().toString());
   const getName = (b: Boat) => b.name || b.title || "Embarcación";
   const getLocation = (b: Boat) => b.location || [b.city, b.country].filter(Boolean).join(", ") || "-";

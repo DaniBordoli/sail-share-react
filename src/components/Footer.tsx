@@ -90,7 +90,7 @@ export const Footer = () => {
                 <Anchor className="h-8 w-8 text-primary" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold">NavBoat</h1>
+                <h1 className="text-2xl font-bold">boatbnb</h1>
                 <p className="text-sm text-white/80">Tu aventura náutica</p>
               </div>
             </div>
@@ -107,7 +107,7 @@ export const Footer = () => {
               </div>
               <div className="flex items-center gap-3 text-white/80">
                 <Mail size={18} className="text-primary" />
-                <span>info@navboat.com</span>
+                <span>info@boatbnb.com</span>
               </div>
               <div className="flex items-center gap-3 text-white/80">
                 <MapPin size={18} className="text-primary" />
@@ -156,7 +156,7 @@ export const Footer = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="text-white/80 text-sm">
-              © 2024 NavBoat. Todos los derechos reservados.
+              © 2024 boatbnb. Todos los derechos reservados.
             </div>
             <div className="flex gap-6 text-sm">
               <a href="#" className="text-white/80 hover:text-primary transition-colors">

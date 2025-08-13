@@ -8,6 +8,7 @@ import boatbnbLogo from "@/assets/logos/boatbnb-logo.png";
 
 export const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   const navigation = [
     { name: "Inicio", href: "/" },
@@ -33,6 +34,13 @@ export const Header = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    onScroll(); // set initial state
+    window.addEventListener('scroll', onScroll, { passive: true } as AddEventListenerOptions);
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   const handleLogout = async () => {
     await logout();
     setIsAuth(false);
@@ -41,7 +49,9 @@ export const Header = () => {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-[60] bg-white/10 backdrop-blur-md border-b border-white/20">
+    <header className={`fixed top-0 left-0 right-0 z-[60] backdrop-blur-md border-b transition-colors duration-300 ${
+      scrolled ? 'bg-slate-900/70 shadow-lg border-transparent' : 'bg-white/10 border-white/20'
+    }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}

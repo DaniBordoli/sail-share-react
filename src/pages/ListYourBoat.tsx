@@ -44,7 +44,7 @@ const ListYourBoat = () => {
           </h1>
           <p className="text-xl text-white/90 mb-8 max-w-3xl mx-auto">
             Convierte tu embarcación en una fuente de ingresos. Únete a miles de propietarios 
-            que ya están ganando dinero con NavBoat.
+            que ya están ganando dinero con boatbnb.
           </p>
           <div className="flex items-center justify-center gap-8 text-white/90">
             <div className="flex items-center gap-2">
@@ -296,7 +296,7 @@ const ListYourBoat = () => {
             {/* Benefits Card */}
             <Card>
               <CardHeader>
-                <CardTitle>¿Por qué elegir NavBoat?</CardTitle>
+                <CardTitle>¿Por qué elegir boatbnb?</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-start gap-3">
@@ -347,7 +347,7 @@ const ListYourBoat = () => {
                     <span className="font-medium">6.800€</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm">Comisión NavBoat (15%)</span>
+                    <span className="text-sm">Comisión boatbnb (15%)</span>
                     <span className="font-medium">-1.020€</span>
                   </div>
                   <Separator />
