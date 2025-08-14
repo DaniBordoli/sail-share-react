@@ -21,10 +21,10 @@ const ListYourBoat = () => {
   ];
 
   const steps = [
-    { number: 1, title: "Información Básica", description: "Detalles de tu embarcación" },
+    { number: 1, title: "Información", description: "Detalles de tu embarcación" },
     { number: 2, title: "Ubicación", description: "Dónde se encuentra" },
     { number: 3, title: "Precios", description: "Tarifas y disponibilidad" },
-    { number: 4, title: "Fotos", description: "Galería de imágenes" },
+    { number: 4, title: "Fotos", description: "Galería de fotos" },
   ];
 
   return (
@@ -32,7 +32,7 @@ const ListYourBoat = () => {
       <Header />
       
       {/* Hero Section */}
-      <div className="pt-20 pb-16 bg-gradient-ocean">
+      <div className="pt-24 md:pt-28 pb-16 bg-gradient-ocean">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="flex justify-center mb-6">
             <div className="p-4 bg-white/20 rounded-full">

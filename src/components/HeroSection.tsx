@@ -45,7 +45,7 @@ export const HeroSection = () => {
       </div>
 
       {/* Main Content */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-24">
         <div className="text-center mb-12">
           <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight">
             Navega tus
