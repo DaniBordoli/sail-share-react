@@ -55,7 +55,7 @@ export const Header = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
-          <div className="flex items-center gap-3">
+          <Link to="/" className="flex items-center gap-3 cursor-pointer select-none">
             <div className="p-2 bg-white/20 rounded-lg">
               <img src={boatbnbLogo} alt="BoatBnB Logo" className="h-8 w-8 object-contain" />
             </div>
@@ -63,7 +63,7 @@ export const Header = () => {
               <h1 className="text-2xl font-bold tracking-tight brand-title">boatbnb</h1>
               <p className="text-xs text-white/80">Tu aventura náutica</p>
             </div>
-          </div>
+          </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
@@ -115,10 +115,10 @@ export const Header = () => {
                 <Menu size={24} />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="bg-white/95 backdrop-blur-lg">
+            <SheetContent side="right" className="bg-white/95 backdrop-blur-lg z-[80]">
               <div className="flex flex-col space-y-6 pt-6">
                 {/* Mobile Logo */}
-                <div className="flex items-center gap-3 pb-6 border-b">
+                <Link to="/" onClick={() => setIsOpen(false)} className="flex items-center gap-3 pb-6 border-b cursor-pointer select-none">
                   <div className="p-2 bg-primary/10 rounded-lg">
                     <img src={boatbnbLogo} alt="BoatBnB Logo" className="h-6 w-6 object-contain" />
                   </div>
@@ -126,7 +126,7 @@ export const Header = () => {
                     <h1 className="text-xl font-bold text-foreground brand-title">boatbnb</h1>
                     <p className="text-xs text-muted-foreground">Tu aventura náutica</p>
                   </div>
-                </div>
+                </Link>
 
                 {/* Mobile Navigation */}
                 <nav className="flex flex-col space-y-4">
