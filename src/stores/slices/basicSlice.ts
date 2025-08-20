@@ -18,6 +18,55 @@ export const testConnection = async () => {
   }
 };
 
+// Actualizar embarcación (propietario)
+export const updateBoat = async (boatId: string, updateData: Record<string, any>) => {
+  const token = localStorage.getItem('authToken');
+  if (!token) throw new Error('No autenticado');
+  const res = await fetch(`${API_BASE_URL}/api/boats/${boatId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify(updateData),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.message || `Error ${res.status}`);
+  return data;
+};
+
+// Eliminar embarcación (propietario)
+export const deleteBoat = async (boatId: string) => {
+  const token = localStorage.getItem('authToken');
+  if (!token) throw new Error('No autenticado');
+  const res = await fetch(`${API_BASE_URL}/api/boats/${boatId}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.message || `Error ${res.status}`);
+  return data;
+};
+
+// Activar/Desactivar publicación
+export const toggleBoatActive = async (boatId: string, isActive: boolean) => {
+  const token = localStorage.getItem('authToken');
+  if (!token) throw new Error('No autenticado');
+  const res = await fetch(`${API_BASE_URL}/api/boats/${boatId}/status`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ isActive }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.message || `Error ${res.status}`);
+  return data;
+};
+
 // ----- Nuevas funciones planas -----
 
 // Cerrar sesión: limpia token local y opcionalmente notifica al backend
@@ -142,6 +191,26 @@ export const createBoat = async (boatData: Record<string, any>) => {
       ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
     },
     body: JSON.stringify(boatData),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.message || `Error ${res.status}`);
+  return data;
+};
+
+// Obtener mis embarcaciones con paginación y orden
+export const getMyBoats = async (params: { page?: number; limit?: number; sort?: string; order?: 'asc'|'desc' } = {}) => {
+  const token = localStorage.getItem('authToken');
+  if (!token) throw new Error('No autenticado');
+  const q = new URLSearchParams({
+    page: String(params.page ?? 1),
+    limit: String(params.limit ?? 10),
+    sort: String(params.sort ?? 'createdAt'),
+    order: String(params.order ?? 'desc'),
+  });
+  const res = await fetch(`${API_BASE_URL}/api/boats/mine?${q.toString()}`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data?.message || `Error ${res.status}`);

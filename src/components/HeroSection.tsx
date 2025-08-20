@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -7,6 +8,7 @@ import { Calendar, MapPin, Anchor, Users } from "lucide-react";
 import heroImage from "@/assets/hero-yacht.jpg";
 
 export const HeroSection = () => {
+  const navigate = useNavigate();
   const [searchData, setSearchData] = useState({
     location: "",
     startDate: "",
@@ -16,8 +18,15 @@ export const HeroSection = () => {
   });
 
   const handleSearch = () => {
-    console.log("Searching with:", searchData);
-    // Here would go the search logic
+    const params = new URLSearchParams();
+    const qParts = [searchData.location, searchData.boatType].filter(Boolean);
+    if (qParts.length) params.set('q', qParts.join(' '));
+    if (searchData.location) params.set('location', searchData.location);
+    if (searchData.boatType) params.set('boatType', searchData.boatType);
+    if (searchData.startDate) params.set('startDate', searchData.startDate);
+    if (searchData.endDate) params.set('endDate', searchData.endDate);
+    if (searchData.guests) params.set('guests', searchData.guests);
+    navigate(`/buscar-barcos${params.toString() ? `?${params.toString()}` : ''}`);
   };
 
   return (
@@ -121,11 +130,11 @@ export const HeroSection = () => {
                     <SelectValue placeholder="Seleccionar" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="motor">Lancha</SelectItem>
-                    <SelectItem value="sailboat">Velero</SelectItem>
-                    <SelectItem value="yacht">Yate</SelectItem>
-                    <SelectItem value="catamaran">Catamarán</SelectItem>
-                    <SelectItem value="rib">Zodiac</SelectItem>
+                    <SelectItem value="Lancha">Lancha</SelectItem>
+                    <SelectItem value="Velero">Velero</SelectItem>
+                    <SelectItem value="Yate">Yate</SelectItem>
+                    <SelectItem value="Catamarán">Catamarán</SelectItem>
+                    <SelectItem value="Neumática">Zodiac</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
