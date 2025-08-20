@@ -17,6 +17,7 @@ import ListYourBoat from "./pages/ListYourBoat";
 import NotFound from "./pages/NotFound";
 import SearchBoats from "./pages/SearchBoats";
 import BoatDetails from "./pages/BoatDetails";
+import MyBoats from "./pages/MyBoats";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const App = () => (
           <Route path="/list-your-boat" element={<ListYourBoat />} />
           <Route path="/buscar-barcos" element={<SearchBoats />} />
           <Route path="/barcos/:id" element={<BoatDetails />} />
+          <Route path="/my-boats" element={<MyBoats />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
