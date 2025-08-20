@@ -76,6 +76,48 @@ export const updateUserAuthorized = async (userId: string, updateData: Partial<U
   return data;
 };
 
+// Subir avatar del usuario (multipart/form-data)
+export const uploadUserAvatar = async (userId: string, file: File) => {
+  const token = localStorage.getItem('authToken');
+  if (!token) throw new Error('No autenticado');
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const url = `${API_BASE_URL}/api/users/${userId}/avatar`;
+  console.groupCollapsed('[avatar][front] uploadUserAvatar');
+  try {
+    console.debug('[avatar][front] endpoint:', url);
+    console.debug('[avatar][front] file:', {
+      name: file.name,
+      size: file.size,
+      type: file.type,
+    });
+    console.debug('[avatar][front] hasToken:', !!token);
+
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        // Importante: no establecer Content-Type manualmente para FormData
+      } as any,
+      body: formData,
+    });
+    let data: any = null;
+    try {
+      data = await res.json();
+    } catch (_) {
+      // no-op
+    }
+    console.debug('[avatar][front] status:', res.status);
+    console.debug('[avatar][front] response:', data);
+    if (!res.ok) throw new Error((data && (data.message || data.error)) || `Error ${res.status}`);
+    return data as ApiResponse<{ avatarUrl: string; publicId?: string }>;
+  } finally {
+    console.groupEnd();
+  }
+};
+
 // Boats: placeholders actuales en backend
 export const getBoats = async () => {
   const res = await fetch(`${API_BASE_URL}/api/boats`);
@@ -204,28 +246,22 @@ export const loginWithGoogle = () => {
     return;
   }
 
-
   const handleMessage = (event: MessageEvent) => {
-    console.log('Mensaje recibido:', event.data);
-    
-    if (event.origin !== window.location.origin) {
-      console.log('Origen no válido:', event.origin);
-      return;
-    }
+    const currentOrigin = window.location.origin;
+    const altLocalhost = currentOrigin.replace('127.0.0.1', 'localhost');
+    const alt127 = currentOrigin.replace('localhost', '127.0.0.1');
+    const allowedOrigins = import.meta.env.DEV
+      ? Array.from(new Set([currentOrigin, altLocalhost, alt127]))
+      : [currentOrigin];
+    const originAllowed = allowedOrigins.includes(event.origin);
+    if (!originAllowed) return;
     
     if (event.data.type === 'GOOGLE_AUTH_SUCCESS' && event.data.token) {
-      console.log('Token recibido:', event.data.token);
-      
-
       localStorage.setItem('authToken', event.data.token);
       
-  
       popup?.close();
-      
-   
       window.location.href = '/';
       
-
       window.removeEventListener('message', handleMessage);
     }
   };
@@ -234,14 +270,11 @@ export const loginWithGoogle = () => {
 
   const checkClosed = setInterval(() => {
     if (popup?.closed) {
-      console.log('Popup cerrado manualmente');
       window.removeEventListener('message', handleMessage);
       clearInterval(checkClosed);
     }
   }, 1000);
-};
-
-
+}
 export const loginWithFacebook = () => {
   const popup = window.open(
     `${API_BASE_URL}/api/auth/facebook`,
@@ -254,40 +287,35 @@ export const loginWithFacebook = () => {
     return;
   }
 
-  
   const handleMessage = (event: MessageEvent) => {
-    console.log('Mensaje de Facebook recibido:', event.data);
-    
-    if (event.origin !== window.location.origin) {
-      console.log('Origen no válido:', event.origin);
+    const currentOrigin = window.location.origin;
+    const altLocalhost = currentOrigin.replace('127.0.0.1', 'localhost');
+    const alt127 = currentOrigin.replace('localhost', '127.0.0.1');
+    const allowedOrigins = import.meta.env.DEV
+      ? Array.from(new Set([currentOrigin, altLocalhost, alt127]))
+      : [currentOrigin];
+    const originAllowed = allowedOrigins.includes(event.origin);
+    if (!originAllowed) {
       return;
     }
     
     if (event.data.type === 'FACEBOOK_AUTH_SUCCESS' && event.data.token) {
-      console.log('Token de Facebook recibido:', event.data.token);
-      
-
       localStorage.setItem('authToken', event.data.token);
       
- 
       popup?.close();
-      
-  
       window.location.href = '/';
       
- 
       window.removeEventListener('message', handleMessage);
     }
   };
 
   window.addEventListener('message', handleMessage);
 
-
   const checkClosed = setInterval(() => {
     if (popup?.closed) {
-      console.log('Popup de Facebook cerrado manualmente');
       window.removeEventListener('message', handleMessage);
       clearInterval(checkClosed);
     }
   }, 1000);
 };
+
