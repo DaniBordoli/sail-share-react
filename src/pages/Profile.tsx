@@ -5,12 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { MapPin, Star, Calendar, Phone, Mail, Edit, Settings, Heart, Ship } from "lucide-react";
+import { MapPin, Star, Calendar, Phone, Mail, Edit, Settings, Heart, Ship, Camera } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { API_BASE_URL } from "@/lib/api";
-import { updateUserAuthorized } from "@/stores/slices/basicSlice";
+import { updateUserAuthorized, uploadUserAvatar } from "@/stores/slices/basicSlice";
 import { useCurrentUser } from "@/hooks/use-current-user";
 
 const Profile = () => {
@@ -18,6 +18,8 @@ const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -36,6 +38,80 @@ const Profile = () => {
     completedRentals: 23,
     favoriteBoats: 8,
     ownedBoats: 2,
+  };
+
+  // Subida opcional a Cloudinary si está configurado
+  const uploadAvatarIfConfigured = async (file: File): Promise<string | null> => {
+    const uploadUrl = import.meta.env.VITE_CLOUDINARY_UPLOAD_URL as string | undefined;
+    const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET as string | undefined;
+    if (!uploadUrl || !uploadPreset) return null;
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", uploadPreset);
+
+    const res = await fetch(uploadUrl, { method: "POST", body: formData });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data?.error?.message || "Error subiendo avatar");
+    return data.secure_url as string;
+  };
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setFormError(null);
+    // Previsualización inmediata
+    const objectUrl = URL.createObjectURL(file);
+    setAvatarPreview(objectUrl);
+
+    try {
+      setAvatarUploading(true);
+      let finalUrl: string | null = null;
+      console.groupCollapsed('[avatar][front] handleAvatarChange');
+      console.debug('[avatar][front] picked file:', { name: file.name, size: file.size, type: file.type });
+
+      // 1) Intento preferente: backend POST /api/users/:id/avatar
+      if (user?._id) {
+        try {
+          console.debug('[avatar][front] trying backend upload');
+          const res = await uploadUserAvatar(user._id, file);
+          console.debug('[avatar][front] backend upload result:', res);
+          if (res?.success && res.data?.avatarUrl) {
+            finalUrl = res.data.avatarUrl;
+          }
+        } catch (err) {
+          console.warn('[avatar][front] backend upload failed, will fallback:', err);
+          // Ignorar y pasar a fallback
+        }
+      }
+
+      // 2) Fallback: subida directa a Cloudinary si hay configuración
+      if (!finalUrl) {
+        console.debug('[avatar][front] trying direct Cloudinary upload (if configured)');
+        const uploadedUrl = await uploadAvatarIfConfigured(file);
+        console.debug('[avatar][front] direct Cloudinary result url:', uploadedUrl);
+        finalUrl = uploadedUrl ?? null;
+      }
+
+      // 3) Persistir en backend si solo tenemos URL (p.ej. por Cloudinary directo)
+      if (user?._id && finalUrl) {
+        try {
+          console.debug('[avatar][front] updating user avatar URL via PUT');
+          await updateUserAuthorized(user._id, { avatar: finalUrl } as any);
+          console.debug('[avatar][front] updateUserAuthorized ok');
+        } catch (_) {
+          // Si el endpoint de avatar ya guardó, este PUT puede no ser necesario; ignoramos error suave
+        }
+        await refetch();
+        setAvatarPreview(null);
+      }
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : "No se pudo actualizar el avatar");
+      console.error('[avatar][front] fatal error:', err);
+    } finally {
+      setAvatarUploading(false);
+      console.groupEnd();
+    }
   };
 
   const recentActivity = [
@@ -95,12 +171,32 @@ const Profile = () => {
       <div className="pt-20 pb-8 bg-gradient-ocean">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-start gap-6 pt-8">
-            <Avatar className="h-32 w-32 border-4 border-white shadow-lg">
-              <AvatarImage src={userProfile.avatar} alt={userProfile.name} />
-              <AvatarFallback className="text-2xl font-bold bg-white text-primary">
-                {userProfile.name.split(' ').map(n => n[0]).join('')}
-              </AvatarFallback>
-            </Avatar>
+            <div className="relative">
+              <label className="block">
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleAvatarChange}
+                />
+                <div className="relative group cursor-pointer">
+                  <Avatar className="h-32 w-32 border-4 border-white shadow-lg">
+                    <AvatarImage src={avatarPreview ?? userProfile.avatar} alt={userProfile.name} />
+                    <AvatarFallback className="text-2xl font-bold bg-white text-primary">
+                      {userProfile.name.split(' ').map(n => n[0]).join('')}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="absolute bottom-1 right-1 p-2 rounded-full bg-black/60 text-white shadow-md group-hover:bg-black/70 transition-colors">
+                    <Camera size={16} />
+                  </div>
+                  {avatarUploading && (
+                    <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center text-white text-sm">
+                      Subiendo...
+                    </div>
+                  )}
+                </div>
+              </label>
+            </div>
             
             <div className="flex-1 space-y-4">
               <div>

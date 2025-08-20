@@ -8,36 +8,30 @@ const AuthSuccess = () => {
     const token = searchParams.get('token');
     const provider = searchParams.get('provider') || 'google'; 
     
-    console.log('AuthSuccess - Token recibido:', token);
-    console.log('AuthSuccess - Proveedor:', provider);
-    console.log('AuthSuccess - window.opener existe:', !!window.opener);
-    
     if (token) {
-   
+    
       if (window.opener) {
-        console.log('Enviando mensaje al popup padre...');
-        
         
         const messageType = provider === 'facebook' ? 'FACEBOOK_AUTH_SUCCESS' : 'GOOGLE_AUTH_SUCCESS';
         
-        window.opener.postMessage({
-          type: messageType,
-          token: token,
-          provider: provider
-        }, window.location.origin);
+        const payload = { type: messageType, token, provider } as const;
+        const defaultOrigin = window.location.origin;
+        const altLocalhost = defaultOrigin.replace('127.0.0.1', 'localhost');
+        const alt127 = defaultOrigin.replace('localhost', '127.0.0.1');
+        const targets = import.meta.env.DEV
+          ? Array.from(new Set([defaultOrigin, altLocalhost, alt127]))
+          : [defaultOrigin];
         
-        console.log('Cerrando popup...');
-    
+        for (const target of targets) {
+          try { window.opener.postMessage(payload, target); } catch (e) {}
+        }
+        
         window.close();
       } else {
-        console.log('No hay window.opener, usando fallback...');
-    
         localStorage.setItem('authToken', token);
         window.location.href = '/';
       }
     } else {
-      console.log('No hay token disponible');
-   
       if (window.opener) {
         window.close();
       } else {
