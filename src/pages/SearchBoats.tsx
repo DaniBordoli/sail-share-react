@@ -57,6 +57,10 @@ const SearchBoats = () => {
     ratingMin: "",
   });
 
+  // UI state
+  const [filtersOpen, setFiltersOpen] = useState<boolean>(false);
+  const [sortBy, setSortBy] = useState<string>("");
+
   useEffect(() => {
     const qParam = searchParams.get('q') || searchParams.get('location') || '';
     if (qParam) setQuery(qParam);
@@ -73,6 +77,8 @@ const SearchBoats = () => {
       model: searchParams.get('model') || prev.model,
       ratingMin: searchParams.get('ratingMin') || prev.ratingMin,
     }));
+    const sortParam = searchParams.get('sort') || '';
+    if (sortParam) setSortBy(sortParam);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -94,11 +100,12 @@ const SearchBoats = () => {
     setOrDel('brand', filters.brand);
     setOrDel('model', filters.model);
     setOrDel('ratingMin', filters.ratingMin);
+    setOrDel('sort', sortBy);
     // preserve dates if present
     setOrDel('startDate', startDateParam);
     setOrDel('endDate', endDateParam);
     setSearchParams(next, { replace: true });
-  }, [query, filters, setSearchParams, guestsParam, startDateParam, endDateParam, searchParams]);
+  }, [query, filters, sortBy, setSearchParams, guestsParam, startDateParam, endDateParam, searchParams]);
 
   useEffect(() => {
     // Basic SEO
@@ -223,6 +230,41 @@ const SearchBoats = () => {
     return byRating(byBrandModel(byYear(byPassengers(byRentalType(byPrice(byType(byText(effectiveBoats))))))));
   }, [effectiveBoats, query, boatTypeParam, filters, guestsParam]);
 
+  // Sorted results based on sortBy
+  const sorted = useMemo(() => {
+    const arr = [...filtered];
+    const num = (v: any) => {
+      const n = Number(v);
+      return Number.isNaN(n) ? 0 : n;
+    };
+    switch (sortBy) {
+      case 'relevance':
+        // keep current filtered order
+        break;
+      case 'price_asc':
+        arr.sort((a, b) => num(a.price) - num(b.price));
+        break;
+      case 'price_desc':
+        arr.sort((a, b) => num(b.price) - num(a.price));
+        break;
+      case 'rating_desc':
+        arr.sort((a, b) => num(b.rating) - num(a.rating));
+        break;
+      case 'capacity_desc':
+        arr.sort((a, b) => num(b.capacity) - num(a.capacity));
+        break;
+      case 'year_desc': {
+        const by = (x: Boat) => num((x as any).buildYear);
+        arr.sort((a, b) => by(b) - by(a));
+        break;
+      }
+      default:
+        // relevance (keep current filtered order)
+        break;
+    }
+    return arr;
+  }, [filtered, sortBy]);
+
   // Active filters count (excluding text query)
   const activeFilters = useMemo(() => {
     const entries: Array<[string, string]> = Object.entries(filters) as any;
@@ -230,7 +272,7 @@ const SearchBoats = () => {
     return active.length;
   }, [filters]);
 
-  const [filtersOpen, setFiltersOpen] = useState<boolean>(false);
+  
 
   const getImg = (b: Boat) => b.imageUrl || b.image || b.photos?.[0] || boatPlaceholder;
   const getId = (b: Boat) => (b._id || b.id || Math.random().toString());
@@ -418,9 +460,27 @@ const SearchBoats = () => {
                 {isError && (
                   <p className="mb-3 text-yellow-100">No se pudo conectar con la API. Mostrando barcos de demostración.</p>
                 )}
-                <p className="text-white/90 mb-4">{filtered.length} resultados</p>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                  <p className="text-white/90">{sorted.length} resultados</p>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-white/80">Ordenar por</span>
+                    <Select value={sortBy} onValueChange={(v)=>setSortBy(v)}>
+                      <SelectTrigger className="w-[220px]">
+                        <SelectValue placeholder="Relevancia" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="relevance">Relevancia</SelectItem>
+                        <SelectItem value="price_asc">Precio: menor a mayor</SelectItem>
+                        <SelectItem value="price_desc">Precio: mayor a menor</SelectItem>
+                        <SelectItem value="rating_desc">Rating: mayor a menor</SelectItem>
+                        <SelectItem value="capacity_desc">Capacidad: mayor a menor</SelectItem>
+                        <SelectItem value="year_desc">Año: más nuevo</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filtered.map((boat) => (
+                  {sorted.map((boat) => (
                     <article key={getId(boat)} className="group">
                       <Card variant="floating" className="overflow-hidden">
                         <div className="aspect-video w-full overflow-hidden">

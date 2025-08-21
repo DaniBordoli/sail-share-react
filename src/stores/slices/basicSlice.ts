@@ -18,6 +18,110 @@ export const testConnection = async () => {
   }
 };
 
+// ===== Profile validation: phone (SMS) =====
+export const requestPhoneVerification = async (phone: string) => {
+  const token = localStorage.getItem('authToken');
+  if (!token) throw new Error('No autenticado');
+  const res = await fetch(`${API_BASE_URL}/api/verification/phone/start`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ phone }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data?.message || `Error ${res.status}`);
+  return data;
+};
+
+export const verifyPhoneCode = async (code: string) => {
+  const token = localStorage.getItem('authToken');
+  if (!token) throw new Error('No autenticado');
+  const res = await fetch(`${API_BASE_URL}/api/verification/phone/verify`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ code }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data?.message || `Error ${res.status}`);
+  return data;
+};
+
+// ===== Profile validation: license =====
+export const requestLicenseValidation = async (file: File) => {
+  const token = localStorage.getItem('authToken');
+  if (!token) throw new Error('No autenticado');
+  const formData = new FormData();
+  formData.append('file', file);
+  const res = await fetch(`${API_BASE_URL}/api/validation/license`, {
+    method: 'POST',
+    headers: {
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    } as any,
+    body: formData,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data?.message || `Error ${res.status}`);
+  return data;
+};
+
+// ===== Admin: license requests moderation =====
+export type LicenseRequest = {
+  _id: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  licenseUrl: string;
+  licenseStatus: 'pending' | 'approved' | 'rejected' | 'none';
+  createdAt?: string;
+};
+
+export const getLicenseRequests = async (): Promise<LicenseRequest[]> => {
+  const token = localStorage.getItem('authToken');
+  if (!token) throw new Error('No autenticado');
+  const res = await fetch(`${API_BASE_URL}/api/admin/license-requests`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.message || `Error ${res.status}`);
+  return data?.data ?? [];
+};
+
+export const approveLicenseRequest = async (requestId: string) => {
+  const token = localStorage.getItem('authToken');
+  if (!token) throw new Error('No autenticado');
+  const res = await fetch(`${API_BASE_URL}/api/admin/license-requests/${requestId}/approve`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data?.message || `Error ${res.status}`);
+  return data;
+};
+
+export const rejectLicenseRequest = async (requestId: string) => {
+  const token = localStorage.getItem('authToken');
+  if (!token) throw new Error('No autenticado');
+  const res = await fetch(`${API_BASE_URL}/api/admin/license-requests/${requestId}/reject`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data?.message || `Error ${res.status}`);
+  return data;
+};
+
 // Actualizar embarcación (propietario)
 export const updateBoat = async (boatId: string, updateData: Record<string, any>) => {
   const token = localStorage.getItem('authToken');

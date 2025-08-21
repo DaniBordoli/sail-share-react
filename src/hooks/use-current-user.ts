@@ -11,6 +11,12 @@ export type CurrentUser = {
   facebookId?: string;
   isVerified?: boolean;
   avatar?: string;
+  // role/admin
+  role?: 'user' | 'admin';
+  // verification profile extras
+  phoneVerified?: boolean;
+  licenseStatus?: 'none' | 'pending' | 'approved' | 'rejected';
+  licenseUrl?: string;
 };
 
 export const useCurrentUser = () => {

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { MapPin, Star, Calendar, Phone, Mail, Edit, Settings, Heart, Ship, Camera } from "lucide-react";
+import { MapPin, Star, Calendar, Phone, Mail, Edit, Settings, Heart, Ship, Camera, BadgeCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
@@ -205,27 +205,47 @@ const Profile = () => {
                 <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
                   {userProfile.name}
                 </h1>
+                <div className="flex flex-wrap items-center gap-2 mb-2">
+                  {user?.licenseStatus === 'approved' && (
+                    <Badge className="bg-green-600 text-white border-green-600 flex items-center gap-1">
+                      <BadgeCheck size={14} />
+                      Usuario con licencia validada
+                    </Badge>
+                  )}
+                  {user?.licenseStatus === 'pending' && (
+                    <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
+                      Licencia pendiente
+                    </Badge>
+                  )}
+                  {user?.licenseStatus === 'rejected' && (
+                    <Badge className="bg-red-600 text-white border-red-600">
+                      Licencia rechazada
+                    </Badge>
+                  )}
+                  {user?.phoneVerified && (
+                    <Badge className="bg-green-600 text-white border-green-600 flex items-center gap-1">
+                      <Phone size={14} />
+                      Teléfono verificado
+                    </Badge>
+                  )}
+                </div>
                 <div className="flex items-center gap-4 text-white/90">
                   <div className="flex items-center gap-1">
-                    <MapPin size={16} />
-                    <span>{userProfile.location}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Calendar size={16} />
-                    <span>Miembro desde {userProfile.memberSince}</span>
+                    <Star className="fill-yellow-400 text-yellow-400" size={20} />
+                    <span className="text-white font-semibold">{userProfile.rating}</span>
+                    <span className="text-white/80">({userProfile.reviews} reseñas)</span>
                   </div>
                 </div>
               </div>
-              
-              <div className="flex items-center gap-6">
+              <div className="flex items-center gap-4 text-white/90">
                 <div className="flex items-center gap-1">
-                  <Star className="fill-yellow-400 text-yellow-400" size={20} />
-                  <span className="text-white font-semibold">{userProfile.rating}</span>
-                  <span className="text-white/80">({userProfile.reviews} reseñas)</span>
+                  <MapPin size={16} />
+                  <span>{userProfile.location}</span>
                 </div>
-                <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
-                  Usuario Verificado
-                </Badge>
+                <div className="flex items-center gap-1">
+                  <Calendar size={16} />
+                  <span>Miembro desde {userProfile.memberSince}</span>
+                </div>
               </div>
             </div>
             
@@ -253,6 +273,67 @@ const Profile = () => {
               </Button>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Content wrapper with muted background (like Admin Panel) */}
+      <div className="bg-muted">
+      {/* Quick Actions - prominent bar */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="-mt-6">
+          <Card className="border-0 shadow-md">
+            <CardContent className="p-4">
+              <div className={`grid grid-cols-1 sm:grid-cols-2 ${user?.role === 'admin' ? 'lg:grid-cols-5' : 'lg:grid-cols-4'} gap-3`}>
+                <Link to="/favorites" className="group rounded-xl border bg-card hover:bg-accent/50 transition-colors p-4 flex items-center gap-3 shadow-sm">
+                  <div className="h-10 w-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center">
+                    <Heart size={18} />
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-semibold">Ver Favoritos</div>
+                    <div className="text-xs text-muted-foreground">Tus barcos guardados</div>
+                  </div>
+                </Link>
+                <Link to="/my-boats" className="group rounded-xl border bg-card hover:bg-accent/50 transition-colors p-4 flex items-center gap-3 shadow-sm">
+                  <div className="h-10 w-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+                    <Ship size={18} />
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-semibold">Mis Barcos</div>
+                    <div className="text-xs text-muted-foreground">Gestiona tus publicaciones</div>
+                  </div>
+                </Link>
+                <Link to="/my-reviews" className="group rounded-xl border bg-card hover:bg-accent/50 transition-colors p-4 flex items-center gap-3 shadow-sm">
+                  <div className="h-10 w-10 rounded-full bg-yellow-100 text-yellow-700 flex items-center justify-center">
+                    <Star size={18} />
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-semibold">Mis Reseñas</div>
+                    <div className="text-xs text-muted-foreground">Consulta tus calificaciones</div>
+                  </div>
+                </Link>
+                <Link to="/profile/validation" className="group rounded-xl border bg-card hover:bg-accent/50 transition-colors p-4 flex items-center gap-3 shadow-sm">
+                  <div className="h-10 w-10 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center">
+                    <Settings size={18} />
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-semibold">Validar Perfil</div>
+                    <div className="text-xs text-muted-foreground">Sube tu licencia</div>
+                  </div>
+                </Link>
+                {user?.role === 'admin' && (
+                  <Link to="/admin" className="group rounded-xl border bg-card hover:bg-accent/50 transition-colors p-4 flex items-center gap-3 shadow-sm">
+                    <div className="h-10 w-10 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center">
+                      <Settings size={18} />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-semibold">Administración</div>
+                      <div className="text-xs text-muted-foreground">Revisar validaciones</div>
+                    </div>
+                  </Link>
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
 
@@ -443,32 +524,10 @@ const Profile = () => {
               </CardContent>
             </Card>
 
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Acciones Rápidas</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <Button variant="outline" className="w-full justify-start gap-2">
-                  <Heart size={16} />
-                  Ver Favoritos
-                </Button>
-                <Button asChild variant="outline" className="w-full justify-start gap-2">
-                  <Link to="/my-boats">
-                    <span className="inline-flex items-center gap-2">
-                      <Ship size={16} />
-                      Mis Barcos
-                    </span>
-                  </Link>
-                </Button>
-                <Button variant="outline" className="w-full justify-start gap-2">
-                  <Star size={16} />
-                  Mis Reseñas
-                </Button>
-              </CardContent>
-            </Card>
+            {/* Quick Actions removed per request - actions moved to prominent bar */}
           </div>
         </div>
+      </div>
       </div>
       
       <Footer />
