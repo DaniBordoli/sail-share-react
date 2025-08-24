@@ -1,0 +1,97 @@
+.price-marker-badge {
+  background: #2563eb;
+  color: #ffffff;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 2px solid #ffffff;
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.2;
+  white-space: nowrap;
+  position: relative;
+  display: inline-block;
+  transform: translateZ(0);
+  transition: transform 0.15s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+  will-change: transform, box-shadow;
+}
+
+.price-marker-badge:hover {
+  transform: scale(1.06);
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.45);
+}
+
+.price-marker-badge:active {
+  transform: scale(0.98);
+}
+
+/* Cola (triángulo) del marcador con borde blanco */
+.price-marker-badge::before,
+.price-marker-badge::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+/* Borde blanco (más grande) */
+.price-marker-badge::before {
+  bottom: -10px;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid #ffffff;
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.15));
+}
+
+/* Triángulo azul encima del borde */
+.price-marker-badge::after {
+  bottom: -8px;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid #2563eb;
+}
+
+/* Dark mode subtle tweaks */
+@media (prefers-color-scheme: dark) {
+  .price-marker-badge {
+    border-color: rgba(255, 255, 255, 0.85);
+  }
+}
+
+/* En Leaflet, los links dentro del popup heredan color por defecto.
+   Forzamos el texto del botón 'Ver más' a blanco en todos los estados. */
+.leaflet-popup-content .ver-mas-btn,
+.leaflet-popup-content .ver-mas-btn:visited,
+.leaflet-popup-content .ver-mas-btn:hover,
+.leaflet-popup-content .ver-mas-btn:focus,
+.leaflet-popup-content .ver-mas-btn:active {
+  color: #ffffff !important;
+  text-decoration: none;
+}
+
+/* Popup card refinements */
+.map-popup-card {
+  display: block;
+}
+
+.map-popup-hero {
+  position: relative;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.map-popup-price-badge {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  backdrop-filter: saturate(140%) blur(2px);
+}

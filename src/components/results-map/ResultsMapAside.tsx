@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMapEvent } from "react-leafl
 import MarkerClusterGroup from "react-leaflet-cluster";
 import L from "leaflet";
 import { Link } from "react-router-dom";
+import "./ResultsMapAside.css";
 
 export interface ResultsMapBoat {
   _id?: string;
@@ -22,11 +23,22 @@ export interface ResultsMapBoat {
   longitude?: number | string;
 }
 
+// Formatear precio en forma compacta: 1.2k, 3.4M, etc.
+function formatPriceShort(v?: number) {
+  if (typeof v !== 'number' || !Number.isFinite(v)) return 'Consultar';
+  const abs = Math.abs(v);
+  const fmt = (n: number) => String(n.toFixed(1)).replace(/\.0$/, '');
+  if (abs >= 1_000_000_000) return `$${fmt(v / 1_000_000_000)}B`;
+  if (abs >= 1_000_000) return `$${fmt(v / 1_000_000)}M`;
+  if (abs >= 1_000) return `$${fmt(v / 1_000)}k`;
+  return `$${new Intl.NumberFormat('en-US').format(v)}`;
+}
+
 const priceIcon = (price?: number) =>
   L.divIcon({
     className: "price-marker",
-    html: `<div style="background:#2563eb;color:white;padding:4px 8px;border-radius:999px;border:2px solid white;box-shadow:0 8px 20px rgba(37,99,235,.35);font-weight:600;font-size:12px;">${
-      typeof price === "number" ? `$${price}` : "$?"
+    html: `<div class="price-marker-badge">${
+      typeof price === "number" ? formatPriceShort(price) : "$?"
     }</div>`,
     iconSize: [0, 0],
     iconAnchor: [0, 0],
@@ -111,20 +123,23 @@ export default function ResultsMapAside({
               position={[Number((b as any).latitude), Number((b as any).longitude)]}
               icon={priceIcon(b.price)}
             >
-              <AnyPopup maxWidth={320} className="!p-0">
-                <div className="p-2 space-y-2">
+              <AnyPopup maxWidth={420} className="!p-0">
+                <div className="p-2 space-y-2 map-popup-card">
                   {getImg(b) ? (
-                    <img src={getImg(b)} alt={getName(b)} className="w-full h-40 object-cover rounded" />
+                    <div className="map-popup-hero">
+                      <img src={getImg(b)} alt={getName(b)} className="w-full h-40 object-cover" />
+                      <span className="map-popup-price-badge">{typeof b.price === 'number' ? formatPriceShort(b.price) : 'Consultar'}</span>
+                    </div>
                   ) : null}
                   <div className="flex items-center justify-between">
                     <div className="font-semibold text-sm truncate mr-2">{getName(b)}</div>
-                    <div className="text-sm font-semibold">{typeof b.price === "number" ? `$${b.price}` : "Consultar"}</div>
+                    <div className="text-sm font-semibold">{typeof b.price === "number" ? formatPriceShort(b.price) : "Consultar"}</div>
                   </div>
-                  <div className="text-xs text-muted-foreground flex items-center justify-between">
+                  <div className="text-xs text-muted-foreground flex flex-col items-start gap-0.5">
                     <span>{getType(b)}</span>
                     <span>{getLoc(b)}</span>
                   </div>
-                  <Link to={`/barcos/${getId(b)}`} className="block w-full text-center text-sm font-medium bg-primary text-primary-foreground rounded px-3 py-2">
+                  <Link to={`/barcos/${getId(b)}`} className="ver-mas-btn block w-full text-center text-sm font-medium bg-primary text-white visited:text-white hover:text-white focus:text-white active:text-white rounded px-3 py-2">
                     Ver más
                   </Link>
                 </div>
