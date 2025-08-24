@@ -15,6 +15,8 @@ import { mockBoats } from "@/data/mockBoats";
 import { Link, useSearchParams } from "react-router-dom";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import boatPlaceholder from "@/assets/hero-yacht.jpg";
+import ResultsMapAside from "@/components/results-map/ResultsMapAside";
+import { API_BASE_URL } from "@/lib/api";
 
 interface Boat {
   _id?: string;
@@ -60,6 +62,8 @@ const SearchBoats = () => {
   // UI state
   const [filtersOpen, setFiltersOpen] = useState<boolean>(false);
   const [sortBy, setSortBy] = useState<string>("");
+  const [showMap, setShowMap] = useState<boolean>(false);
+  const [areaResults, setAreaResults] = useState<any[] | null>(null);
 
   useEffect(() => {
     const qParam = searchParams.get('q') || searchParams.get('location') || '';
@@ -146,9 +150,10 @@ const SearchBoats = () => {
     return { min, max };
   }, [effectiveBoats]);
 
-  const filtered = useMemo(() => {
+  // Reusable filtering pipeline
+  const applyFilters = (source: Boat[]) => {
     const q = query.toLowerCase().trim();
-    const byText = (arr: typeof effectiveBoats) => {
+    const byText = (arr: Boat[]) => {
       if (!q) return arr;
       return arr.filter((b) => {
         const parts = [b.name, b.title, b.location, b.city, b.country, (b as any).type, (b as any).boatType]
@@ -158,7 +163,7 @@ const SearchBoats = () => {
         return parts.includes(q);
       });
     };
-    const byType = (arr: typeof effectiveBoats) => {
+    const byType = (arr: Boat[]) => {
       const t = (boatTypeParam || '').toLowerCase().trim();
       if (!t && !filters.boatType) return arr;
       return arr.filter((b) => {
@@ -167,7 +172,7 @@ const SearchBoats = () => {
         return (t ? bt.includes(t) : true) && (filterT ? bt.includes(filterT) : true);
       });
     };
-    const byPrice = (arr: typeof effectiveBoats) => {
+    const byPrice = (arr: Boat[]) => {
       const min = Number(filters.priceMin);
       const max = Number(filters.priceMax);
       const hasMin = !Number.isNaN(min) && filters.priceMin !== "";
@@ -181,7 +186,7 @@ const SearchBoats = () => {
         return true;
       });
     };
-    const byRentalType = (arr: typeof effectiveBoats) => {
+    const byRentalType = (arr: Boat[]) => {
       const rt = filters.rentalType;
       if (!rt) return arr;
       return arr.filter((b) => {
@@ -190,12 +195,12 @@ const SearchBoats = () => {
         return priceUnit === rt.toLowerCase() || rentalTypes.includes(rt.toLowerCase());
       });
     };
-    const byPassengers = (arr: typeof effectiveBoats) => {
+    const byPassengers = (arr: Boat[]) => {
       const n = Number(filters.passengers || guestsParam);
       if (Number.isNaN(n) || (!filters.passengers && !guestsParam)) return arr;
       return arr.filter((b) => Number(b.capacity || (b as any).guests) >= n);
     };
-    const byYear = (arr: typeof effectiveBoats) => {
+    const byYear = (arr: Boat[]) => {
       const ymin = Number(filters.yearMin);
       const ymax = Number(filters.yearMax);
       const hMin = !Number.isNaN(ymin) && filters.yearMin !== "";
@@ -209,7 +214,7 @@ const SearchBoats = () => {
         return true;
       });
     };
-    const byBrandModel = (arr: typeof effectiveBoats) => {
+    const byBrandModel = (arr: Boat[]) => {
       const brand = filters.brand.toLowerCase().trim();
       const model = filters.model.toLowerCase().trim();
       if (!brand && !model) return arr;
@@ -221,25 +226,27 @@ const SearchBoats = () => {
         return true;
       });
     };
-    const byRating = (arr: typeof effectiveBoats) => {
+    const byRating = (arr: Boat[]) => {
       const r = Number(filters.ratingMin);
       if (Number.isNaN(r) || filters.ratingMin === "") return arr;
       return arr.filter((b) => Number(b.rating || 0) >= r);
     };
+    return byRating(byBrandModel(byYear(byPassengers(byRentalType(byPrice(byType(byText(source))))))));
+  };
 
-    return byRating(byBrandModel(byYear(byPassengers(byRentalType(byPrice(byType(byText(effectiveBoats))))))));
-  }, [effectiveBoats, query, boatTypeParam, filters, guestsParam]);
+  const filtered = useMemo(() => applyFilters(effectiveBoats), [effectiveBoats, query, boatTypeParam, filters, guestsParam]);
 
-  // Sorted results based on sortBy
-  const sorted = useMemo(() => {
-    const arr = [...filtered];
+  // When areaResults exist, apply same filters to them
+  const areaFiltered = useMemo(() => applyFilters(areaResults || []), [areaResults, query, boatTypeParam, filters, guestsParam]);
+
+  const applySort = (source: Boat[]) => {
+    const arr = [...source];
     const num = (v: any) => {
       const n = Number(v);
       return Number.isNaN(n) ? 0 : n;
     };
     switch (sortBy) {
       case 'relevance':
-        // keep current filtered order
         break;
       case 'price_asc':
         arr.sort((a, b) => num(a.price) - num(b.price));
@@ -259,11 +266,19 @@ const SearchBoats = () => {
         break;
       }
       default:
-        // relevance (keep current filtered order)
         break;
     }
     return arr;
-  }, [filtered, sortBy]);
+  };
+
+  // Sorted results based on sortBy
+  const sorted = useMemo(() => applySort(filtered), [filtered, sortBy]);
+  const areaSorted = useMemo(() => applySort(areaFiltered), [areaFiltered, sortBy]);
+
+  // Reset area results when filters/query/sort change
+  useEffect(() => {
+    setAreaResults(null);
+  }, [query, JSON.stringify(filters), sortBy]);
 
   // Active filters count (excluding text query)
   const activeFilters = useMemo(() => {
@@ -477,68 +492,109 @@ const SearchBoats = () => {
                         <SelectItem value="year_desc">Año: más nuevo</SelectItem>
                       </SelectContent>
                     </Select>
+                    <Button variant={showMap ? "default" : "outline"} onClick={()=>setShowMap(v=>!v)}>
+                      {showMap ? 'Ocultar mapa' : 'Ver mapa'}
+                    </Button>
                   </div>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {sorted.map((boat) => (
-                    <article key={getId(boat)} className="group">
-                      <Card variant="floating" className="overflow-hidden">
-                        <div className="aspect-video w-full overflow-hidden">
-                          <Link to={`/barcos/${getId(boat)}`}>
-                            <img
-                              src={getImg(boat)}
-                              alt={`${getName(boat)} en ${getLocation(boat)} - alquiler de barcos`}
-                              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                              loading="lazy"
-                            />
-                          </Link>
-                        </div>
-                        <CardHeader>
-                          <CardTitle className="flex items-start justify-between gap-3">
-                            <span className="truncate">{getName(boat)}</span>
-                            <div className="flex items-center gap-2 shrink-0">
-                              {(boat as any).type || (boat as any).boatType ? (
-                                <Badge variant="outline" className="text-xs">
-                                  {(boat as any).type || (boat as any).boatType}
-                                </Badge>
-                              ) : null}
-                              {boat.rating ? (
-                                <span className="flex items-center gap-1 text-sm text-muted-foreground">
-                                  <Star className="h-4 w-4 text-yellow-500" /> {boat.rating.toFixed(1)}
-                                </span>
-                              ) : null}
-                            </div>
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="pt-0 text-sm text-muted-foreground">
-                          <div className="flex items-center gap-2">
-                            <MapPin className="h-4 w-4" />
-                            <span>{getLocation(boat)}</span>
+                {areaResults && (
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <div className="px-3 py-2 rounded-md bg-white/90 text-sm shadow-floating">
+                      Mostrando resultados en el área del mapa: <strong>{areaSorted.length}</strong> barcos
+                    </div>
+                    <Button size="sm" variant="outline" onClick={()=>setAreaResults(null)}>
+                      Quitar filtro de mapa
+                    </Button>
+                  </div>
+                )}
+                <div className={showMap ? "grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-6" : "grid grid-cols-1"}>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {(areaResults ? areaSorted : sorted).map((boat) => (
+                      <article key={getId(boat)} className="group">
+                        <Card variant="floating" className="overflow-hidden">
+                          <div className="aspect-video w-full overflow-hidden">
+                            <Link to={`/barcos/${getId(boat)}`}>
+                              <img
+                                src={getImg(boat)}
+                                alt={`${getName(boat)} en ${getLocation(boat)} - alquiler de barcos`}
+                                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                loading="lazy"
+                              />
+                            </Link>
                           </div>
-                          <div className="flex items-center gap-4 mt-2">
-                            <div className="flex items-center gap-1">
-                              <Users className="h-4 w-4" />
-                              <span>{boat.capacity ?? "-"}</span>
+                          <CardHeader>
+                            <CardTitle className="flex items-start justify-between gap-3">
+                              <span className="truncate">{getName(boat)}</span>
+                              <div className="flex items-center gap-2 shrink-0">
+                                {(boat as any).type || (boat as any).boatType ? (
+                                  <Badge variant="outline" className="text-xs">
+                                    {(boat as any).type || (boat as any).boatType}
+                                  </Badge>
+                                ) : null}
+                                {boat.rating ? (
+                                  <span className="flex items-center gap-1 text-sm text-muted-foreground">
+                                    <Star className="h-4 w-4 text-yellow-500" /> {boat.rating.toFixed(1)}
+                                  </span>
+                                ) : null}
+                              </div>
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="pt-0 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-2">
+                              <MapPin className="h-4 w-4" />
+                              <span>{getLocation(boat)}</span>
                             </div>
-                            <div className="flex items-center gap-1">
-                              <Anchor className="h-4 w-4" />
-                              <span>{(boat as any).length ?? "-"}</span>
+                            <div className="flex items-center gap-4 mt-2">
+                              <div className="flex items-center gap-1">
+                                <Users className="h-4 w-4" />
+                                <span>{boat.capacity ?? "-"}</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Anchor className="h-4 w-4" />
+                                <span>{(boat as any).length ?? "-"}</span>
+                              </div>
                             </div>
-                          </div>
-                        </CardContent>
-                        <CardFooter className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                          <div className="text-sm w-full sm:w-auto">
-                            <span className="text-muted-foreground">Desde</span>{" "}
-                            <span className="font-semibold">{boat.price ? `$${boat.price}` : "Consultar"}</span>{" "}
-                            <span className="text-muted-foreground">{((boat as any).priceUnit === 'week') ? '/ semana' : '/ día'}</span>
-                          </div>
-                          <Button className="w-full sm:w-auto" variant="ocean" size="sm" asChild>
-                            <Link to={`/barcos/${getId(boat)}`}>Ver detalles</Link>
-                          </Button>
-                        </CardFooter>
-                      </Card>
-                    </article>
-                  ))}
+                          </CardContent>
+                          <CardFooter className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="text-sm w-full sm:w-auto">
+                              <span className="text-muted-foreground">Desde</span>{" "}
+                              <span className="font-semibold">{boat.price ? `$${boat.price}` : "Consultar"}</span>{" "}
+                              <span className="text-muted-foreground">{((boat as any).priceUnit === 'week') ? '/ semana' : '/ día'}</span>
+                            </div>
+                            <Button className="w-full sm:w-auto" variant="ocean" size="sm" asChild>
+                              <Link to={`/barcos/${getId(boat)}`}>Ver detalles</Link>
+                            </Button>
+                          </CardFooter>
+                        </Card>
+                      </article>
+                    ))}
+                  </div>
+
+                  {showMap && (
+                    <aside className="h-[70vh] sticky top-24">
+                      <ResultsMapAside
+                        boats={(areaResults ? areaSorted : sorted) as any}
+                        onAskSearchInArea={async (b) => {
+                          try {
+                            const params = new URLSearchParams({
+                              north: String(b.north),
+                              south: String(b.south),
+                              east: String(b.east),
+                              west: String(b.west),
+                              limit: '120',
+                            });
+                            const resp = await fetch(`${API_BASE_URL}/api/boats/near?${params.toString()}`);
+                            const json = await resp.json();
+                            if (json?.success && Array.isArray(json.data)) {
+                              setAreaResults(json.data);
+                            }
+                          } catch (_) {
+                            // no-op
+                          }
+                        }}
+                      />
+                    </aside>
+                  )}
                 </div>
               </>
             )}

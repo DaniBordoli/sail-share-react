@@ -26,6 +26,8 @@ const Profile = () => {
     firstName: "",
     lastName: "",
     phone: "",
+    dniOrLicense: "",
+    experienceDeclaration: "",
   });
 
   const userProfile = {
@@ -260,6 +262,8 @@ const Profile = () => {
                       firstName: (user.firstName ?? ""),
                       lastName: (user.lastName ?? ""),
                       phone: (user.phone ?? ""),
+                      dniOrLicense: (user.dniOrLicense ?? ""),
+                      experienceDeclaration: (user.experienceDeclaration ?? ""),
                     });
                   }
                   setIsEditing((v) => !v);
@@ -364,6 +368,8 @@ const Profile = () => {
                           firstName: form.firstName,
                           lastName: form.lastName,
                           phone: form.phone,
+                          dniOrLicense: form.dniOrLicense,
+                          experienceDeclaration: form.experienceDeclaration,
                         });
                         await refetch();
                         setIsEditing(false);
@@ -401,6 +407,26 @@ const Profile = () => {
                         placeholder="Ej: +34 600 000 000"
                       />
                     </div>
+                    <div className="md:col-span-2">
+                      <Label htmlFor="dniOrLicense">DNI o Licencia de Navegación</Label>
+                      <Input
+                        id="dniOrLicense"
+                        value={form.dniOrLicense}
+                        onChange={(e) => setForm((f) => ({ ...f, dniOrLicense: e.target.value }))}
+                        placeholder="Número de documento o licencia"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <Label htmlFor="experienceDeclaration">Declaración de experiencia</Label>
+                      <textarea
+                        id="experienceDeclaration"
+                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                        placeholder="Describe tu experiencia náutica, años navegando, tipos de embarcaciones, etc."
+                        value={form.experienceDeclaration}
+                        onChange={(e) => setForm((f) => ({ ...f, experienceDeclaration: e.target.value }))}
+                        rows={4}
+                      />
+                    </div>
                     <div className="md:col-span-2 flex gap-2 justify-end mt-2">
                       <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>
                         Cancelar
@@ -410,6 +436,26 @@ const Profile = () => {
                       </Button>
                     </div>
                   </form>
+                </CardContent>
+              </Card>
+            )}
+            {/* Nautical Experience display */}
+            {!isEditing && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Experiencia Náutica</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div>
+                    <div className="text-sm text-muted-foreground">DNI o Licencia</div>
+                    <div className="text-sm">{user?.dniOrLicense || "—"}</div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-muted-foreground">Declaración de experiencia</div>
+                    <div className="text-sm whitespace-pre-wrap">
+                      {user?.experienceDeclaration?.trim() ? user.experienceDeclaration : "Aún no completado. Usa \"Editar Perfil\" para completarlo."}
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             )}
