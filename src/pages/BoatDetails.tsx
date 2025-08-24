@@ -16,7 +16,8 @@ interface Boat {
   name?: string;
   title?: string;
   description?: string;
-  location?: string;
+  // Puede ser string o GeoJSON/objeto con campos formateados
+  location?: any;
   city?: string;
   country?: string;
   price?: number;
@@ -49,7 +50,17 @@ const BoatDetails = () => {
 
   const getImg = (b?: Boat) => b?.imageUrl || b?.image || b?.photos?.[0] || heroImage;
   const getName = (b?: Boat) => b?.name || b?.title || "Embarcación";
-  const getLocation = (b?: Boat) => b?.location || [b?.city, b?.country].filter(Boolean).join(", ") || "-";
+  const getLocation = (b?: Boat) => {
+    const loc: any = b?.location as any;
+    if (typeof loc === 'string') return loc;
+    if (loc && typeof loc === 'object') {
+      if (typeof loc.addressFormatted === 'string' && loc.addressFormatted.trim()) return loc.addressFormatted;
+      if (typeof loc.formatted === 'string' && loc.formatted.trim()) return loc.formatted;
+      // Si fuera GeoJSON { type, coordinates }, no lo renderizamos directamente
+    }
+    const cc = [b?.city, b?.country].filter(Boolean).join(', ');
+    return cc || '-';
+  };
 
   useEffect(() => {
     const name = getName(boat);

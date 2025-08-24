@@ -23,7 +23,8 @@ interface Boat {
   id?: string | number;
   name?: string;
   title?: string;
-  location?: string;
+  // location may now be GeoJSON or a string; keep loose typing
+  location?: any;
   city?: string;
   country?: string;
   price?: number;
@@ -156,7 +157,7 @@ const SearchBoats = () => {
     const byText = (arr: Boat[]) => {
       if (!q) return arr;
       return arr.filter((b) => {
-        const parts = [b.name, b.title, b.location, b.city, b.country, (b as any).type, (b as any).boatType]
+        const parts = [b.name, b.title, getLocation(b), b.city, b.country, (b as any).type, (b as any).boatType]
           .filter(Boolean)
           .join(" ")
           .toLowerCase();
@@ -292,7 +293,19 @@ const SearchBoats = () => {
   const getImg = (b: Boat) => b.imageUrl || b.image || b.photos?.[0] || boatPlaceholder;
   const getId = (b: Boat) => (b._id || b.id || Math.random().toString());
   const getName = (b: Boat) => b.name || b.title || "Embarcación";
-  const getLocation = (b: Boat) => b.location || [b.city, b.country].filter(Boolean).join(", ") || "-";
+  const getLocation = (b: Boat) => {
+    const loc: any = (b as any).location;
+    if (typeof loc === 'string') return loc;
+    if (loc && typeof loc === 'object') {
+      // Prefer formatted/human readable if present
+      if (typeof loc.addressFormatted === 'string' && loc.addressFormatted.trim()) return loc.addressFormatted;
+      if (typeof loc.formatted === 'string' && loc.formatted.trim()) return loc.formatted;
+      // If it's GeoJSON { type, coordinates }, avoid rendering the object
+      // Fall back to city,country
+    }
+    const cc = [b.city, b.country].filter(Boolean).join(', ');
+    return cc || '-';
+  };
 
   return (
     <div className="relative min-h-screen isolate">
