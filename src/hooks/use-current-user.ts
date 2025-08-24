@@ -7,6 +7,8 @@ export type CurrentUser = {
   lastName?: string;
   email: string;
   phone?: string;
+  dniOrLicense?: string;
+  experienceDeclaration?: string;
   googleId?: string;
   facebookId?: string;
   isVerified?: boolean;

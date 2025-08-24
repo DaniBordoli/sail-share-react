@@ -12,6 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, ChevronRight, Images, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import LocationAutocomplete, { LocationSuggestion } from "@/components/LocationAutocomplete";
+import MyBoatMapPicker from "@/components/MyBoatMapPicker";
 
 // Helper: upload multiple photos to Cloudinary (unsigned)
 async function uploadPhotos(files: File[]): Promise<string[]> {
@@ -97,6 +99,8 @@ export default function MyBoats() {
   const [formError, setFormError] = useState<string[]|null>(null);
   const [photosFiles, setPhotosFiles] = useState<File[]>([]);
   const [existingPhotos, setExistingPhotos] = useState<string[]>([]);
+  const [addressFromMap, setAddressFromMap] = useState(false);
+  const [prevLocBeforeMap, setPrevLocBeforeMap] = useState<null | { addressFormatted: string; latitude: string; longitude: string }>(null);
   const [form, setForm] = useState<any>({
     name: '',
     rentalTypes: [] as string[],
@@ -110,6 +114,9 @@ export default function MyBoats() {
     length: '',
     contactNumber: '',
     city: '',
+    latitude: '',
+    longitude: '',
+    addressFormatted: '',
     description: '',
     price: '',
     priceUnit: 'day',
@@ -147,6 +154,9 @@ export default function MyBoats() {
       const v = (form as any)[k];
       if (v === undefined || v === null || String(v).trim() === '') errs.push(`Campo obligatorio faltante: ${fieldLabels[k] || k}`);
     }
+    // Coordenadas obligatorias
+    if (!form.latitude || String(form.latitude).trim() === '') errs.push('Ubicación: latitud es obligatoria (selecciona una sugerencia)');
+    if (!form.longitude || String(form.longitude).trim() === '') errs.push('Ubicación: longitud es obligatoria (selecciona una sugerencia)');
     if (!Array.isArray(form.rentalTypes) || form.rentalTypes.length === 0) errs.push(`Selecciona al menos un ${fieldLabels['rentalTypes']}`);
     const year = Number(form.buildYear);
     const now = new Date().getFullYear();
@@ -170,12 +180,25 @@ export default function MyBoats() {
       setSaving(true);
       const newUrls = photosFiles.length ? await uploadPhotos(photosFiles) : [];
       const photos = [...existingPhotos, ...newUrls];
-      const payload = { ...form, buildYear: Number(form.buildYear), capacity: Number(form.capacity), enginePower: Number(form.enginePower), length: Number(form.length), price: Number(form.price), photos };
+      const payload = { 
+        ...form,
+        // normalizar tipos
+        buildYear: Number(form.buildYear),
+        capacity: Number(form.capacity),
+        enginePower: Number(form.enginePower),
+        length: Number(form.length),
+        price: Number(form.price),
+        // incluir coords solo si están presentes
+        latitude: form.latitude ? Number(form.latitude) : undefined,
+        longitude: form.longitude ? Number(form.longitude) : undefined,
+        addressFormatted: form.addressFormatted || undefined,
+        photos,
+      };
       const res = editId ? await updateBoat(editId, payload) : await createBoat(payload);
       if (res?.success) {
         setFormOpen(false);
         setEditId(null);
-        setForm({ name: '', rentalTypes: [], area: '', boatType: '', brand: '', model: '', buildYear: '', capacity: '', enginePower: '', length: '', contactNumber: '', city: '', description: '', price: '', priceUnit: 'day' });
+        setForm({ name: '', rentalTypes: [], area: '', boatType: '', brand: '', model: '', buildYear: '', capacity: '', enginePower: '', length: '', contactNumber: '', city: '', latitude: '', longitude: '', addressFormatted: '', description: '', price: '', priceUnit: 'day' });
         setPhotosFiles([]);
         setExistingPhotos([]);
         await load();
@@ -205,6 +228,9 @@ export default function MyBoats() {
       length: String(b.length ?? ''),
       contactNumber: b.contactNumber || '',
       city: b.city || '',
+      latitude: b.latitude ? String(b.latitude) : '',
+      longitude: b.longitude ? String(b.longitude) : '',
+      addressFormatted: b.addressFormatted || '',
       description: b.description || '',
       price: String(b.price ?? ''),
       priceUnit: b.priceUnit || 'day',
@@ -436,9 +462,97 @@ export default function MyBoats() {
                         <Input value={form.contactNumber} onChange={(e)=>setForm((f:any)=>({...f, contactNumber:e.target.value}))} placeholder="Ej: +34 600 000 000" />
                       </div>
 
-                      <div>
-                        <Label>Ciudad</Label>
-                        <Input value={form.city} onChange={(e)=>setForm((f:any)=>({...f, city:e.target.value}))} />
+                      <div className="md:col-span-2">
+                        <Label>Dirección (autocompletar)</Label>
+                        <div className="mt-1">
+                          <LocationAutocomplete
+                            placeholder="Escribe una dirección, puerto o ciudad"
+                            value={form.addressFormatted}
+                            onChangeText={(text: string) => {
+                              setForm((f:any)=>({
+                                ...f,
+                                addressFormatted: text,
+                                // al editar texto manualmente, invalidar coords hasta nueva selección
+                                latitude: '',
+                                longitude: '',
+                              }));
+                              setAddressFromMap(false);
+                              setPrevLocBeforeMap(null);
+                            }}
+                            onSelect={(loc: LocationSuggestion) => {
+                              setForm((f:any)=>({
+                                ...f,
+                                city: loc.city || f.city,
+                                latitude: String(loc.lat),
+                                longitude: String(loc.lon),
+                                addressFormatted: loc.formatted,
+                              }));
+                              setAddressFromMap(false);
+                              setPrevLocBeforeMap(null);
+                            }}
+                          />
+                        </div>
+                        {form.addressFormatted && (
+                          <div className="flex items-center gap-3 mt-1">
+                            <div className="text-xs text-muted-foreground">Seleccionado: {form.addressFormatted}</div>
+                            {addressFromMap && (
+                              <>
+                                <Badge variant="default" className="text-[10px] bg-blue-600 text-white">Dirección actualizada desde el mapa</Badge>
+                                {prevLocBeforeMap && (
+                                  <Button
+                                    type="button"
+                                    variant="link"
+                                    className="h-auto p-0 text-xs"
+                                    onClick={() => {
+                                      setForm((f:any)=>({
+                                        ...f,
+                                        addressFormatted: prevLocBeforeMap.addressFormatted,
+                                        latitude: prevLocBeforeMap.latitude,
+                                        longitude: prevLocBeforeMap.longitude,
+                                      }));
+                                      setAddressFromMap(false);
+                                      setPrevLocBeforeMap(null);
+                                    }}
+                                  >
+                                    Revertir a dirección original
+                                  </Button>
+                                )}
+                              </>
+                            )}
+                          </div>
+                        )}
+                        {/* Mensaje de validación inline para coords */}
+                        {Array.isArray(formError) && (formError.some(m => m.toLowerCase().includes('latitud')) || formError.some(m => m.toLowerCase().includes('longitud'))) && (
+                          <div className="text-xs text-red-600 mt-1">Selecciona una dirección de la lista para completar latitud y longitud</div>
+                        )}
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-2">
+                          <div>
+                            <Label>Ciudad</Label>
+                            <Input value={form.city} onChange={(e)=>setForm((f:any)=>({...f, city:e.target.value}))} />
+                          </div>
+                          <div>
+                            <Label>Latitud</Label>
+                            <Input value={form.latitude} readOnly placeholder="—" />
+                          </div>
+                          <div>
+                            <Label>Longitud</Label>
+                            <Input value={form.longitude} readOnly placeholder="—" />
+                          </div>
+                        </div>
+                        {/* MapPicker para ajustar ubicación con marcador draggable */}
+                        <div className="mt-3">
+                          <MyBoatMapPicker
+                            value={form.latitude && form.longitude ? { lat: Number(form.latitude), lng: Number(form.longitude) } : null}
+                            onChange={(c)=>{
+                              setForm((f:any)=>({ ...f, latitude: String(c.lat), longitude: String(c.lng) }));
+                            }}
+                            onAddressChange={(formatted)=>{
+                              setPrevLocBeforeMap({ addressFormatted: String(form.addressFormatted || ''), latitude: String(form.latitude || ''), longitude: String(form.longitude || '') });
+                              setForm((f:any)=>({ ...f, addressFormatted: formatted }));
+                              setAddressFromMap(true);
+                            }}
+                          />
+                        </div>
                       </div>
 
                       <div className="md:col-span-2">

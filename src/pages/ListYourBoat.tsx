@@ -10,8 +10,17 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Ship, Upload, MapPin, Euro, Calendar, Users, Anchor, Wifi, Car, Utensils, Waves, CheckCircle } from "lucide-react";
+import { useState } from "react";
+import LocationAutocomplete, { LocationSuggestion } from "@/components/LocationAutocomplete";
 
 const ListYourBoat = () => {
+  const [selectedLocation, setSelectedLocation] = useState<{
+    lat?: number;
+    lon?: number;
+    formatted?: string;
+    city?: string;
+    country?: string;
+  }>({});
   const features = [
     { id: "wifi", name: "WiFi", icon: Wifi },
     { id: "parking", name: "Aparcamiento", icon: Car },
@@ -182,13 +191,42 @@ const ListYourBoat = () => {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="city">Ciudad</Label>
-                    <Input id="city" placeholder="Marbella" />
+                    <Input id="city" placeholder="Marbella" value={selectedLocation.city || ""} readOnly />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="address">Dirección completa</Label>
-                  <Input id="address" placeholder="Puerto José Banús, 29660 Marbella, Málaga" />
+                  <Label>Dirección (autocompletar)</Label>
+                  <LocationAutocomplete
+                    placeholder="Escribe una dirección, puerto o ciudad"
+                    onSelect={(loc: LocationSuggestion) => {
+                      setSelectedLocation({
+                        lat: loc.lat,
+                        lon: loc.lon,
+                        formatted: loc.formatted,
+                        city: loc.city,
+                        country: loc.country,
+                      });
+                    }}
+                    countryFilter={undefined}
+                  />
+                  {selectedLocation.formatted ? (
+                    <div className="text-sm text-muted-foreground">
+                      Seleccionado: {selectedLocation.formatted}
+                    </div>
+                  ) : null}
                 </div>
+                {selectedLocation.lat !== undefined && selectedLocation.lon !== undefined && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Latitud</Label>
+                      <Input value={selectedLocation.lat} readOnly />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Longitud</Label>
+                      <Input value={selectedLocation.lon} readOnly />
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
