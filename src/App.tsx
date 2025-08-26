@@ -45,7 +45,7 @@ const App = () => (
           <Route path="/verify-email/error" element={<VerifyEmailError />} />
           <Route path="/register-email-sent" element={<RegisterEmailSent />} />
           <Route path="/list-your-boat" element={<ListYourBoat />} />
-          <Route path="/buscar-barcos" element={<SearchBoats />} />
+          <Route path="/explorar-barcos" element={<SearchBoats />} />
           <Route path="/barcos/:id" element={<BoatDetails />} />
           <Route path="/my-boats" element={<MyBoats />} />
           <Route path="/favorites" element={<Favorites />} />
