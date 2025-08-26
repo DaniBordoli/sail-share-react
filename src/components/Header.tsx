@@ -12,7 +12,7 @@ export const Header = () => {
 
   const navigation = [
     { name: "Inicio", href: "/" },
-    { name: "Buscar Barcos", href: "/buscar-barcos" },
+    { name: "Explorar Barcos", href: "/explorar-barcos" },
     { name: "Destinos", href: "#" },
     { name: "Alquila tu Barco", href: "/list-your-boat" },
     { name: "Ayuda", href: "#" }

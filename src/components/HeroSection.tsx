@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar, MapPin, Anchor, Users } from "lucide-react";
 import heroImage from "@/assets/hero-yacht.jpg";
+import heroVideo from "@/assets/hero-video.mp4";
 
 export const HeroSection = () => {
   const navigate = useNavigate();
@@ -26,43 +27,45 @@ export const HeroSection = () => {
     if (searchData.startDate) params.set('startDate', searchData.startDate);
     if (searchData.endDate) params.set('endDate', searchData.endDate);
     if (searchData.guests) params.set('guests', searchData.guests);
-    navigate(`/buscar-barcos${params.toString() ? `?${params.toString()}` : ''}`);
+    navigate(`/explorar-barcos${params.toString() ? `?${params.toString()}` : ''}`);
   };
 
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Hero Background */}
-      <div 
-        className="absolute inset-0 z-0"
-        style={{
-          backgroundImage: `url(${heroImage})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
-        }}
-      >
+      {/* Hero Background (Video) */}
+      <div className="absolute inset-0 z-0 overflow-hidden">
+        <video
+          className="absolute inset-0 w-full h-full object-cover"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          poster={heroImage}
+        >
+          <source src={heroVideo} type="video/mp4" />
+        </video>
         <div className="absolute inset-0 bg-gradient-hero opacity-60"></div>
         <div className="absolute inset-0 bg-black/20"></div>
       </div>
 
       {/* Floating Elements */}
-      <div className="absolute top-20 left-10 text-white/30 float-animation">
+      {/* <div className="absolute top-20 left-10 text-white/30 float-animation">
         <Anchor size={60} />
       </div>
       <div className="absolute bottom-32 right-16 text-white/20 wave-animation">
         <Anchor size={40} />
-      </div>
+      </div> */}
 
       {/* Main Content */}
       <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-24">
         <div className="text-center mb-12">
           <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight">
-            Navega tus
-            <span className="bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent"> Sueños</span>
+          Alquila tu barco en minutos,
+            <span className="block bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">en cualquier destino</span>
           </h1>
           <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed">
-            Descubre más de 50,000 barcos y yates disponibles para alquiler en todo el mundo. 
-            Tu aventura perfecta te está esperando.
+          Más de 50,000 barcos y yates en todo el mundo. Reserva fácil, segura y con precios transparentes.
           </p>
           <div className="flex items-center justify-center gap-2 text-white/80 mb-8">
             <div className="flex items-center gap-1">
@@ -70,7 +73,7 @@ export const HeroSection = () => {
               <span className="font-semibold">4.9/5</span>
             </div>
             <span className="text-white/60">•</span>
-            <span>Basado en <strong>180,000+</strong> reseñas</span>
+            <span>Basado en <strong>180,000+</strong> experiencias reales</span>
           </div>
         </div>
 
@@ -127,7 +130,7 @@ export const HeroSection = () => {
                 </label>
                 <Select value={searchData.boatType} onValueChange={(value) => setSearchData({...searchData, boatType: value})}>
                   <SelectTrigger className="border-muted focus:border-primary">
-                    <SelectValue placeholder="Seleccionar" />
+                    <SelectValue placeholder="Elige tu embarcación" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Lancha">Lancha</SelectItem>

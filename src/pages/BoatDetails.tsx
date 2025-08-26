@@ -135,7 +135,7 @@ const BoatDetails = () => {
       <main className="relative z-10 pt-24 pb-16">
         <header className="max-w-7xl mx-auto px-4 mb-6">
           <nav className="text-white/80 text-sm mb-2">
-            <Link to="/buscar-barcos" className="hover:underline">← Volver a la búsqueda</Link>
+            <Link to="/explorar-barcos" className="hover:underline">← Volver a la búsqueda</Link>
           </nav>
           <h1 className="text-3xl md:text-4xl font-bold text-white">{getName(boat)}</h1>
           <p className="text-white/80 mt-2 flex items-center gap-2">
