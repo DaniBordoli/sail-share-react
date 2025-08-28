@@ -18,6 +18,88 @@ export const testConnection = async () => {
   }
 };
 
+// Enviar barco a revisión (propietario)
+export const submitBoatForReview = async (boatId: string) => {
+  const token = localStorage.getItem('authToken');
+  if (!token) throw new Error('No autenticado');
+  const res = await fetch(`${API_BASE_URL}/api/boats/${boatId}/submit`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data?.message || `Error ${res.status}`);
+  return data;
+};
+
+// ===== Admin: boats moderation =====
+export type AdminBoat = {
+  _id: string;
+  name: string;
+  ownerId: string;
+  ownerName?: string;
+  ownerEmail?: string;
+  status: 'draft'|'pending_review'|'approved'|'rejected';
+  isActive: boolean;
+  brand?: string;
+  model?: string;
+  boatType?: string;
+  area?: string;
+  price?: number;
+  priceUnit?: 'day'|'week';
+  capacity?: number;
+  length?: number;
+  description?: string;
+  submittedAt?: string;
+  reviewedAt?: string;
+  reviewNotes?: string;
+  createdAt?: string;
+  photos?: string[];
+};
+
+export const adminListBoats = async (params: { status?: string; q?: string; owner?: string; page?: number; limit?: number }) => {
+  const token = localStorage.getItem('authToken');
+  if (!token) throw new Error('No autenticado');
+  const q = new URLSearchParams();
+  if (params?.status) q.set('status', params.status);
+  if (params?.q) q.set('q', params.q);
+  if (params?.owner) q.set('owner', params.owner);
+  if (params?.page) q.set('page', String(params.page));
+  if (params?.limit) q.set('limit', String(params.limit));
+  const res = await fetch(`${API_BASE_URL}/api/admin/boats?${q.toString()}`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.message || `Error ${res.status}`);
+  return data as { success: boolean; data: AdminBoat[]; meta?: any };
+};
+
+export const adminApproveBoat = async (boatId: string) => {
+  const token = localStorage.getItem('authToken');
+  if (!token) throw new Error('No autenticado');
+  const res = await fetch(`${API_BASE_URL}/api/admin/boats/${boatId}/approve`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data?.message || `Error ${res.status}`);
+  return data;
+};
+
+export const adminRejectBoat = async (boatId: string, notes?: string) => {
+  const token = localStorage.getItem('authToken');
+  if (!token) throw new Error('No autenticado');
+  const res = await fetch(`${API_BASE_URL}/api/admin/boats/${boatId}/reject`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ notes }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data?.message || `Error ${res.status}`);
+  return data;
+};
+
 // ===== Profile validation: phone (SMS) =====
 export const requestPhoneVerification = async (phone: string) => {
   const token = localStorage.getItem('authToken');

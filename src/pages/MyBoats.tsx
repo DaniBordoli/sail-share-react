@@ -2,7 +2,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useEffect, useMemo, useState } from "react";
-import { getMyBoats, createBoat, updateBoat, deleteBoat, toggleBoatActive } from "@/stores/slices/basicSlice";
+import { getMyBoats, createBoat, updateBoat, deleteBoat, toggleBoatActive, submitBoatForReview } from "@/stores/slices/basicSlice";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,10 +10,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { ChevronLeft, ChevronRight, Images, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import LocationAutocomplete, { LocationSuggestion } from "@/components/LocationAutocomplete";
 import MyBoatMapPicker from "@/components/MyBoatMapPicker";
+import { toast } from "sonner";
 
 // Helper: upload multiple photos to Cloudinary (unsigned)
 async function uploadPhotos(files: File[]): Promise<string[]> {
@@ -362,17 +364,58 @@ export default function MyBoats() {
                             )}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-wrap">
                               <h3 className="font-semibold truncate">{b.name}</h3>
                               {b.isActive ? <Badge>Activa</Badge> : <Badge variant="secondary">Inactiva</Badge>}
+                              {/* Estado de revisión */}
+                              {b.status === 'approved' && <Badge className="bg-emerald-600 text-white">Aprobado</Badge>}
+                              {b.status === 'pending_review' && <Badge className="bg-amber-500 text-white">En revisión</Badge>}
+                              {b.status === 'draft' && <Badge variant="outline">Borrador</Badge>}
+                              {b.status === 'rejected' && <Badge variant="destructive">Rechazado</Badge>}
                             </div>
                             <div className="text-sm text-muted-foreground truncate">
                               {b.boatType} • {b.brand} {b.model} • {b.area}
                             </div>
                             <div className="text-sm mt-1">Precio: €{b.price} / {b.priceUnit === 'day' ? 'día' : 'semana'}</div>
+                            {b.status === 'rejected' && (
+                              <div className="mt-2">
+                                <Alert variant="destructive">
+                                  <AlertTitle>Motivo de rechazo</AlertTitle>
+                                  <AlertDescription>
+                                    {b.reviewNotes ? (
+                                      <span>{b.reviewNotes}</span>
+                                    ) : (
+                                      <span>No se proporcionaron notas.</span>
+                                    )}
+                                    {b.reviewedAt && (
+                                      <div className="text-xs text-muted-foreground mt-1">Revisado: {new Date(b.reviewedAt).toLocaleString()}</div>
+                                    )}
+                                  </AlertDescription>
+                                </Alert>
+                              </div>
+                            )}
                             <div className="flex flex-col sm:flex-row gap-2 mt-2">
                               <Button className="w-full sm:w-auto" size="sm" variant="outline" onClick={() => onEdit(b)}>Editar</Button>
                               <Button className="w-full sm:w-auto" size="sm" variant="outline" onClick={() => onToggleActive(b)}>{b.isActive ? 'Desactivar' : 'Activar'}</Button>
+                              {(b.status === 'draft' || b.status === 'rejected') && (
+                                <Button
+                                  className="w-full sm:w-auto"
+                                  size="sm"
+                                  onClick={async () => {
+                                    try {
+                                      const res = await submitBoatForReview(b._id);
+                                      if (res?.success) {
+                                        toast.success('Barco enviado a validación');
+                                        await load();
+                                      } else {
+                                        toast.error(res?.message || 'No se pudo enviar a validación');
+                                      }
+                                    } catch (e:any) {
+                                      toast.error(e?.message || 'Error enviando a validación');
+                                    }
+                                  }}
+                                >Enviar a validación</Button>
+                              )}
                               <Button className="w-full sm:w-auto" size="sm" variant="destructive" onClick={() => onDelete(b)}>Eliminar</Button>
                             </div>
                           </div>
