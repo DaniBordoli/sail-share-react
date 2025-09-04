@@ -35,9 +35,7 @@ async function uploadPhotos(files: File[]): Promise<string[]> {
   return urls;
 }
 
-const areas = [
-  'Andalucía', 'Cataluña', 'Valencia', 'Islas Baleares', 'Islas Canarias', 'Galicia', 'País Vasco', 'Murcia'
-];
+// Área geográfica eliminada: se utilizarán ciudad y dirección
 
 const boatTypes = [
   'Velero', 'Catamarán', 'Lancha', 'Yate', 'Neumática', 'Pesca-paseo'
@@ -106,7 +104,6 @@ export default function MyBoats() {
   const [form, setForm] = useState<any>({
     name: '',
     rentalTypes: [] as string[],
-    area: '',
     boatType: '',
     brand: '',
     model: '',
@@ -134,7 +131,6 @@ export default function MyBoats() {
   // Mapeo de etiquetas legibles por campo para mensajes de error
   const fieldLabels: Record<string, string> = {
     name: 'Nombre del barco',
-    area: 'Área geográfica',
     boatType: 'Tipo de barco',
     brand: 'Marca',
     model: 'Modelo',
@@ -151,7 +147,7 @@ export default function MyBoats() {
 
   const validateForm = (): string[] | null => {
     const errs: string[] = [];
-    const required = ['name','area','boatType','brand','model','buildYear','capacity','enginePower','length','contactNumber','city','description','price'];
+    const required = ['name','boatType','brand','model','buildYear','capacity','enginePower','length','contactNumber','city','description','price'];
     for (const k of required) {
       const v = (form as any)[k];
       if (v === undefined || v === null || String(v).trim() === '') errs.push(`Campo obligatorio faltante: ${fieldLabels[k] || k}`);
@@ -200,7 +196,7 @@ export default function MyBoats() {
       if (res?.success) {
         setFormOpen(false);
         setEditId(null);
-        setForm({ name: '', rentalTypes: [], area: '', boatType: '', brand: '', model: '', buildYear: '', capacity: '', enginePower: '', length: '', contactNumber: '', city: '', latitude: '', longitude: '', addressFormatted: '', description: '', price: '', priceUnit: 'day' });
+        setForm({ name: '', rentalTypes: [], boatType: '', brand: '', model: '', buildYear: '', capacity: '', enginePower: '', length: '', contactNumber: '', city: '', latitude: '', longitude: '', addressFormatted: '', description: '', price: '', priceUnit: 'day' });
         setPhotosFiles([]);
         setExistingPhotos([]);
         await load();
@@ -220,7 +216,6 @@ export default function MyBoats() {
     setForm({
       name: b.name || '',
       rentalTypes: Array.isArray(b.rentalTypes) ? b.rentalTypes : [],
-      area: b.area || '',
       boatType: b.boatType || '',
       brand: b.brand || '',
       model: b.model || '',
@@ -325,7 +320,6 @@ export default function MyBoats() {
                     <SelectContent>
                       <SelectItem value="createdAt">Fecha de creación</SelectItem>
                       <SelectItem value="name">Nombre</SelectItem>
-                      <SelectItem value="area">Área</SelectItem>
                       <SelectItem value="boatType">Tipo</SelectItem>
                       <SelectItem value="brand">Marca</SelectItem>
                       <SelectItem value="model">Modelo</SelectItem>
@@ -341,7 +335,7 @@ export default function MyBoats() {
                     </SelectContent>
                   </Select>
                 </div>
-                <Button className="w-full sm:w-auto" onClick={() => { setFormOpen(true); setEditId(null); setExistingPhotos([]); setPhotosFiles([]); setForm({ name: '', rentalTypes: [], area: '', boatType: '', brand: '', model: '', buildYear: '', capacity: '', enginePower: '', length: '', contactNumber: '', city: '', description: '', price: '', priceUnit: 'day' }); }}>Agregar embarcación</Button>
+                <Button className="w-full sm:w-auto" onClick={() => { setFormOpen(true); setEditId(null); setExistingPhotos([]); setPhotosFiles([]); setForm({ name: '', rentalTypes: [], boatType: '', brand: '', model: '', buildYear: '', capacity: '', enginePower: '', length: '', contactNumber: '', city: '', description: '', price: '', priceUnit: 'day' }); }}>Agregar embarcación</Button>
               </div>
 
               <Card>
@@ -374,7 +368,7 @@ export default function MyBoats() {
                               {b.status === 'rejected' && <Badge variant="destructive">Rechazado</Badge>}
                             </div>
                             <div className="text-sm text-muted-foreground truncate">
-                              {b.boatType} • {b.brand} {b.model} • {b.area}
+                              {b.boatType} • {b.brand} {b.model} • {b.city}
                             </div>
                             <div className="text-sm mt-1">Precio: €{b.price} / {b.priceUnit === 'day' ? 'día' : 'semana'}</div>
                             {b.status === 'rejected' && (
@@ -450,17 +444,7 @@ export default function MyBoats() {
                         <Input value={form.name} onChange={(e)=>setForm((f:any)=>({...f, name:e.target.value}))} />
                       </div>
 
-                      <div>
-                        <Label>Área geográfica</Label>
-                        <Select value={form.area} onValueChange={(v)=>setForm((f:any)=>({...f, area:v}))}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecciona área" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {areas.map(a=> <SelectItem key={a} value={a}>{a}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
-                      </div>
+                      {/* Campo 'Área geográfica' eliminado */}
 
                       <div>
                         <Label>Tipo de barco</Label>
@@ -713,7 +697,7 @@ export default function MyBoats() {
               <div className="min-w-0">
                 <div className="font-medium truncate">{boatToDelete.name}</div>
                 <div className="text-sm text-muted-foreground truncate">
-                  {boatToDelete.boatType} • {boatToDelete.brand} {boatToDelete.model} • {boatToDelete.area}
+                  {boatToDelete.boatType} • {boatToDelete.brand} {boatToDelete.model} • {boatToDelete.city}
                 </div>
               </div>
             </div>
