@@ -180,4 +180,10 @@
     background-size: 1000px 100%;
     animation: shimmer 3s infinite;
   }
+
+  /* Ensure header overlays Leaflet controls inside map picker */
+  .map-picker .leaflet-top,
+  .map-picker .leaflet-bottom {
+    z-index: 10; /* Header is 1000, keep controls low so they don't overlap header */
+  }
 }

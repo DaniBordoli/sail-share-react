@@ -23,7 +23,6 @@ interface Boat {
   id?: string | number;
   name?: string;
   title?: string;
-  // location may now be GeoJSON or a string; keep loose typing
   location?: any;
   city?: string;
   country?: string;
@@ -33,6 +32,7 @@ interface Boat {
   imageUrl?: string;
   image?: string;
   photos?: string[];
+  addressFormatted?: string;
   type?: string;
 }
 
@@ -574,7 +574,7 @@ const SearchBoats = () => {
                           <CardContent className="pt-0 text-sm text-muted-foreground">
                             <div className="flex items-center gap-2">
                               <MapPin className="h-4 w-4" />
-                              <span>{getLocation(boat)}</span>
+                              <span>{boat.addressFormatted}</span>
                             </div>
                             {(getOwnerName(boat)) && (
                               <div className="flex items-center gap-2 mt-2">
