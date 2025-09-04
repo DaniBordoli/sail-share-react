@@ -18,6 +18,58 @@ export const testConnection = async () => {
   }
 };
 
+// ===== Favorites =====
+export const listMyFavorites = async () => {
+  const token = localStorage.getItem('authToken');
+  if (!token) throw new Error('No autenticado');
+  const res = await fetch(`${API_BASE_URL}/api/favorites`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data?.message || `Error ${res.status}`);
+  // Esperado: { items: Boat[] }
+  return data as { items: any[] };
+};
+
+export const toggleFavorite = async (boatId: string) => {
+  const token = localStorage.getItem('authToken');
+  if (!token) throw new Error('No autenticado');
+  const res = await fetch(`${API_BASE_URL}/api/favorites/${boatId}/toggle`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data?.message || `Error ${res.status}`);
+  // Esperado: { favorited: boolean }
+  return data as { favorited: boolean };
+};
+
+// ===== Reviews =====
+export const listMyReviews = async () => {
+  const token = localStorage.getItem('authToken');
+  if (!token) throw new Error('No autenticado');
+  const res = await fetch(`${API_BASE_URL}/api/reviews/mine`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data?.message || `Error ${res.status}`);
+  // Esperado: { items: Review[] }
+  return data as { items: any[] };
+};
+
+export const createReview = async (payload: { bookingId?: string; boatId: string; rating: number; comment?: string }) => {
+  const token = localStorage.getItem('authToken');
+  if (!token) throw new Error('No autenticado');
+  const res = await fetch(`${API_BASE_URL}/api/reviews`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data?.message || `Error ${res.status}`);
+  return data as { success?: boolean; review?: any };
+};
+
 // Enviar barco a revisión (propietario)
 export const submitBoatForReview = async (boatId: string) => {
   const token = localStorage.getItem('authToken');
@@ -45,7 +97,7 @@ export type AdminBoat = {
   brand?: string;
   model?: string;
   boatType?: string;
-  area?: string;
+  city?: string;
   price?: number;
   priceUnit?: 'day'|'week';
   capacity?: number;
@@ -368,6 +420,36 @@ export const getBoatById = async (boatId: string) => {
   return data;
 };
 
+// Listado de barcos por propietario (para perfil de propietario)
+export const getBoatsByOwner = async (ownerId: string, params?: { page?: number; limit?: number; sort?: string; order?: 'asc'|'desc' }) => {
+  const q = new URLSearchParams();
+  q.set('owner', ownerId);
+  if (params?.page) q.set('page', String(params.page));
+  if (params?.limit) q.set('limit', String(params.limit));
+  if (params?.sort) q.set('sort', params.sort);
+  if (params?.order) q.set('order', params.order);
+  const res = await fetch(`${API_BASE_URL}/api/boats?${q.toString()}`);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.message || `Error ${res.status}`);
+  return data as { data: any[]; total?: number };
+};
+
+// Enviar mensaje al propietario (contacto previo a reserva)
+export const contactOwner = async (payload: { boatId: string; name: string; email: string; message: string }) => {
+  const token = localStorage.getItem('authToken');
+  const res = await fetch(`${API_BASE_URL}/api/messages/contact-owner`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data?.message || `Error ${res.status}`);
+  return data as { message: string; data?: { id: string } };
+};
+
 export const createBoat = async (boatData: Record<string, any>) => {
   const token = localStorage.getItem('authToken');
   const res = await fetch(`${API_BASE_URL}/api/boats`, {
@@ -381,6 +463,93 @@ export const createBoat = async (boatData: Record<string, any>) => {
   const data = await res.json();
   if (!res.ok) throw new Error(data?.message || `Error ${res.status}`);
   return data;
+};
+
+// ===== Bookings =====
+export const checkBoatAvailability = async (boatId: string, start: string, end: string) => {
+  const q = new URLSearchParams({ start, end });
+  const res = await fetch(`${API_BASE_URL}/api/bookings/availability/${boatId}?${q.toString()}`);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.message || `Error ${res.status}`);
+  return data as { available: boolean };
+};
+
+export const getBoatBlockedDates = async (boatId: string) => {
+  const res = await fetch(`${API_BASE_URL}/api/bookings/availability/${boatId}`);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.message || `Error ${res.status}`);
+  return data as { blocked: { startDate: string; endDate: string }[] };
+};
+
+export const createBooking = async (payload: {
+  boatId: string;
+  startDate: string;
+  endDate: string;
+  guests: number;
+  extras?: { captain?: boolean; fuel?: boolean };
+  rentalType?: 'boat_only' | 'with_captain' | 'owner_onboard';
+  flexibleCancellation?: boolean;
+  contactPhone?: string; // nuevo: teléfono de contacto
+  hasChildren?: boolean; // nuevo: indica si hay niños entre los pasajeros
+  // CV náutico (opcionales)
+  sailingExperience?: 'none'|'basic'|'intermediate'|'advanced';
+  motorExperience?: 'none'|'basic'|'intermediate'|'advanced';
+  licenseType?: string;
+  ownershipExperience?: 'none'|'rented_before'|'owned_before';
+  additionalDescription?: string;
+}) => {
+  const token = localStorage.getItem('authToken');
+  const res = await fetch(`${API_BASE_URL}/api/bookings`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data?.message || `Error ${res.status}`);
+  return data as { message: string; booking: any };
+};
+
+export const listMyBookings = async () => {
+  const token = localStorage.getItem('authToken');
+  if (!token) throw new Error('No autenticado');
+  const res = await fetch(`${API_BASE_URL}/api/bookings/mine`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.message || `Error ${res.status}`);
+  return data as { items: any[] };
+};
+
+// Listar reservas de barcos del propietario autenticado
+export const listOwnerBookings = async () => {
+  const token = localStorage.getItem('authToken');
+  if (!token) throw new Error('No autenticado');
+  const res = await fetch(`${API_BASE_URL}/api/bookings/owner`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.message || `Error ${res.status}`);
+  return data as { items: any[] };
+};
+
+// Actualizar estado de una reserva (propietario)
+export const updateBookingStatus = async (bookingId: string, status: 'confirmed'|'cancelled') => {
+  const token = localStorage.getItem('authToken');
+  if (!token) throw new Error('No autenticado');
+  const res = await fetch(`${API_BASE_URL}/api/bookings/${bookingId}/status`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ status }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data?.message || `Error ${res.status}`);
+  return data as { message: string; booking: any };
 };
 
 // Obtener mis embarcaciones con paginación y orden

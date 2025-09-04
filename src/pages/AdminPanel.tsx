@@ -50,6 +50,15 @@ const AdminPanel = () => {
     }
   };
 
+  // Helpers: traducir estados a etiquetas en español
+  const licenseStatusLabel = (s: LicenseRequest['licenseStatus']) => (
+    { pending: 'Pendiente', approved: 'Aprobada', rejected: 'Rechazada', none: 'Sin estado' } as const
+  )[s] || s;
+
+  const boatStatusLabel = (s: AdminBoat['status']) => (
+    { draft: 'Borrador', pending_review: 'En revisión', approved: 'Aprobado', rejected: 'Rechazado' } as const
+  )[s] || s;
+
   const openPreview = (boat: AdminBoat) => {
     setPreviewBoat(boat);
     setPreviewOpen(true);
@@ -137,7 +146,7 @@ const AdminPanel = () => {
                     <div key={r._id} className="flex flex-col md:flex-row md:items-center gap-3 justify-between border rounded-lg p-3">
                       <div className="space-y-1">
                         <div className="font-medium">{[r.firstName, r.lastName].filter(Boolean).join(' ') || r.email || r._id}</div>
-                        <div className="text-sm text-muted-foreground">Estado: {r.licenseStatus}</div>
+                        <div className="text-sm text-muted-foreground">Estado: {licenseStatusLabel(r.licenseStatus)}</div>
                         {(() => {
                           const url = r.licenseUrl || '';
                           const isPdfExt = /\.pdf(\?|$)/i.test(url);
@@ -245,7 +254,7 @@ const AdminPanel = () => {
                     })).map((b)=> (
                     <div key={b._id} className="flex flex-col md:flex-row md:items-center gap-3 justify-between border rounded-lg p-3">
                       <div className="space-y-1 min-w-0">
-                        <div className="font-medium truncate">{b.name} <span className="text-xs text-muted-foreground">({b._id})</span></div>
+                        <div className="font-medium truncate">{b.name}</div>
                         {(b.ownerName || b.ownerEmail || b.ownerId) && (
                           <div className="text-xs text-muted-foreground truncate">
                             Propietario: {b.ownerName || b.ownerEmail || b.ownerId}
@@ -254,12 +263,14 @@ const AdminPanel = () => {
                             ) : null}
                           </div>
                         )}
-                        <div className="text-sm text-muted-foreground truncate">Estado: {b.status} • Activo: {b.isActive ? 'sí' : 'no'}</div>
+                        <div className="text-sm text-muted-foreground truncate">Estado: {boatStatusLabel(b.status)} • Activo: {b.isActive ? 'sí' : 'no'}</div>
                       </div>
                       <div className="flex gap-2">
                         <Button variant="outline" size="sm" onClick={() => openPreview(b)}>Ver</Button>
                         <Button
-                          variant="secondary"
+                          variant="default"
+                          size="sm"
+                          className="bg-emerald-600 hover:bg-emerald-700 text-white"
                           disabled={boatActingId === b._id}
                           onClick={async ()=>{
                             try {
@@ -280,6 +291,7 @@ const AdminPanel = () => {
                         >Aprobar</Button>
                         <Button
                           variant="destructive"
+                          size="sm"
                           onClick={()=>{ setRejectTargetId(b._id); setRejectNotes(""); setRejectOpen(true); }}
                         >Rechazar</Button>
                       </div>
@@ -327,7 +339,7 @@ const AdminPanel = () => {
                 )}
                 <div><span className="text-muted-foreground">Tipo:</span> {previewBoat.boatType}</div>
                 <div><span className="text-muted-foreground">Marca/Modelo:</span> {previewBoat.brand} {previewBoat.model}</div>
-                <div><span className="text-muted-foreground">Zona:</span> {previewBoat.area}</div>
+                <div><span className="text-muted-foreground">Ciudad:</span> {previewBoat.city}</div>
                 <div><span className="text-muted-foreground">Precio:</span> €{previewBoat.price} / {previewBoat.priceUnit === 'day' ? 'día' : 'semana'}</div>
                 <div><span className="text-muted-foreground">Capacidad:</span> {previewBoat.capacity || '-'}</div>
                 <div><span className="text-muted-foreground">Eslora:</span> {previewBoat.length || '-'}</div>
@@ -346,7 +358,9 @@ const AdminPanel = () => {
               )}
               <div className="flex justify-end gap-2 pt-2">
                 <Button
-                  variant="secondary"
+                  variant="default"
+                  size="sm"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white"
                   onClick={async ()=>{
                     try {
                       setBoatActingId(previewBoat._id);
@@ -364,6 +378,7 @@ const AdminPanel = () => {
                 >Aprobar</Button>
                 <Button
                   variant="destructive"
+                  size="sm"
                   onClick={()=>{ setRejectTargetId(previewBoat._id); setRejectNotes(""); setRejectOpen(true); }}
                 >Rechazar</Button>
               </div>

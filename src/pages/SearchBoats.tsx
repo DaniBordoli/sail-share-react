@@ -45,6 +45,7 @@ const SearchBoats = () => {
   const guestsParam = searchParams.get('guests') || '';
   const startDateParam = searchParams.get('startDate') || '';
   const endDateParam = searchParams.get('endDate') || '';
+  const ownerParam = searchParams.get('owner') || '';
 
   // Filters state
   const [filters, setFilters] = useState({
@@ -109,8 +110,10 @@ const SearchBoats = () => {
     // preserve dates if present
     setOrDel('startDate', startDateParam);
     setOrDel('endDate', endDateParam);
+    // preserve owner filter if present
+    setOrDel('owner', ownerParam);
     setSearchParams(next, { replace: true });
-  }, [query, filters, sortBy, setSearchParams, guestsParam, startDateParam, endDateParam, searchParams]);
+  }, [query, filters, sortBy, setSearchParams, guestsParam, startDateParam, endDateParam, searchParams, ownerParam]);
 
   useEffect(() => {
     // Basic SEO
@@ -134,8 +137,15 @@ const SearchBoats = () => {
   }, []);
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["boats"],
-    queryFn: getBoats,
+    queryKey: ["boats", ownerParam || "all"],
+    queryFn: async () => {
+      if (ownerParam) {
+        const params = new URLSearchParams({ owner: ownerParam });
+        const resp = await fetch(`${API_BASE_URL}/api/boats?${params.toString()}`);
+        return resp.json();
+      }
+      return getBoats();
+    },
   });
 
   const boats: Boat[] = (data?.data as any) || (Array.isArray(data) ? data : []) || [];
@@ -150,6 +160,26 @@ const SearchBoats = () => {
     const max = Math.max(...prices);
     return { min, max };
   }, [effectiveBoats]);
+
+  // Helper functions
+  const getLocation = (b: Boat) => {
+    const loc: any = (b as any).location;
+    if (typeof loc === 'string') return loc;
+    if (loc && typeof loc === 'object') {
+      // Prefer formatted/human readable if present
+      if (typeof loc.addressFormatted === 'string' && loc.addressFormatted.trim()) return loc.addressFormatted;
+      if (typeof loc.formatted === 'string' && loc.formatted.trim()) return loc.formatted;
+      // If it's GeoJSON { type, coordinates }, avoid rendering the object
+      if (loc.coordinates && Array.isArray(loc.coordinates)) {
+        return `${loc.coordinates[1]?.toFixed(2)}, ${loc.coordinates[0]?.toFixed(2)}`;
+      }
+      if (loc.lat && loc.lng) {
+        return `${loc.lat.toFixed(2)}, ${loc.lng.toFixed(2)}`;
+      }
+    }
+    const cc = [b.city, b.country].filter(Boolean).join(', ');
+    return cc || 'Ubicación no disponible';
+  };
 
   // Reusable filtering pipeline
   const applyFilters = (source: Boat[]) => {
@@ -293,19 +323,8 @@ const SearchBoats = () => {
   const getImg = (b: Boat) => b.imageUrl || b.image || b.photos?.[0] || boatPlaceholder;
   const getId = (b: Boat) => (b._id || b.id || Math.random().toString());
   const getName = (b: Boat) => b.name || b.title || "Embarcación";
-  const getLocation = (b: Boat) => {
-    const loc: any = (b as any).location;
-    if (typeof loc === 'string') return loc;
-    if (loc && typeof loc === 'object') {
-      // Prefer formatted/human readable if present
-      if (typeof loc.addressFormatted === 'string' && loc.addressFormatted.trim()) return loc.addressFormatted;
-      if (typeof loc.formatted === 'string' && loc.formatted.trim()) return loc.formatted;
-      // If it's GeoJSON { type, coordinates }, avoid rendering the object
-      // Fall back to city,country
-    }
-    const cc = [b.city, b.country].filter(Boolean).join(', ');
-    return cc || '-';
-  };
+  const getOwnerName = (b: any) => b.ownerName || 'Propietario';
+  const getOwnerAvatar = (b: any) => b.ownerAvatar || '';
 
   return (
     <div className="relative min-h-screen isolate">
@@ -557,6 +576,22 @@ const SearchBoats = () => {
                               <MapPin className="h-4 w-4" />
                               <span>{getLocation(boat)}</span>
                             </div>
+                            {(getOwnerName(boat)) && (
+                              <div className="flex items-center gap-2 mt-2">
+                                {getOwnerAvatar(boat) ? (
+                                  <img src={getOwnerAvatar(boat)} alt={getOwnerName(boat)} className="h-6 w-6 rounded-full object-cover" loading="lazy" />
+                                ) : (
+                                  <div className="h-6 w-6 rounded-full bg-muted" />
+                                )}
+                                <Link
+                                  to={`/explorar-barcos?owner=${encodeURIComponent(String((boat as any).ownerId || ''))}`}
+                                  className="hover:underline"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  {getOwnerName(boat)}
+                                </Link>
+                              </div>
+                            )}
                             <div className="flex items-center gap-4 mt-2">
                               <div className="flex items-center gap-1">
                                 <Users className="h-4 w-4" />

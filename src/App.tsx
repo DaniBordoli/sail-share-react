@@ -20,8 +20,15 @@ import NotFound from "./pages/NotFound";
 import SearchBoats from "./pages/SearchBoats";
 import BoatDetails from "./pages/BoatDetails";
 import MyBoats from "./pages/MyBoats";
+import BookingPage from "./pages/BookingPage";
 import Favorites from "./pages/Favorites";
 import MyReviews from "./pages/MyReviews";
+import OwnerProfile from "./pages/OwnerProfile";
+import OwnerBookings from "./pages/OwnerBookings";
+import MyBookings from "./pages/MyBookings";
+import Checkout from "./pages/Checkout";
+import CheckoutSuccess from "./pages/CheckoutSuccess";
+import CheckoutError from "./pages/CheckoutError";
 
 const queryClient = new QueryClient();
 
@@ -47,7 +54,14 @@ const App = () => (
           <Route path="/list-your-boat" element={<ListYourBoat />} />
           <Route path="/explorar-barcos" element={<SearchBoats />} />
           <Route path="/barcos/:id" element={<BoatDetails />} />
+          <Route path="/barcos/:id/reservar" element={<BookingPage />} />
+          <Route path="/propietario/:ownerId" element={<OwnerProfile />} />
           <Route path="/my-boats" element={<MyBoats />} />
+          <Route path="/mis-reservas" element={<MyBookings />} />
+          <Route path="/owner/reservas" element={<OwnerBookings />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/checkout/success" element={<CheckoutSuccess />} />
+          <Route path="/checkout/error" element={<CheckoutError />} />
           <Route path="/favorites" element={<Favorites />} />
           <Route path="/my-reviews" element={<MyReviews />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

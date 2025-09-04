@@ -37,8 +37,8 @@ const Profile = () => {
     location: "—",
     memberSince: "—",
     avatar: user?.avatar || "/placeholder.svg",
-    rating: 4.8,
-    reviews: 47,
+    rating: user?.rating ?? 0,
+    reviews: user?.ratingCount ?? 0,
     completedRentals: 23,
     favoriteBoats: 8,
     ownedBoats: 2,
@@ -284,10 +284,11 @@ const Profile = () => {
       <div className="bg-muted">
       {/* Quick Actions - prominent bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
         <div className="-mt-6">
           <Card className="border-0 shadow-md">
             <CardContent className="p-4">
-              <div className={`grid grid-cols-1 sm:grid-cols-2 ${user?.role === 'admin' ? 'lg:grid-cols-5' : 'lg:grid-cols-4'} gap-3`}>
+              <div className={"grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"}>
                 <Link to="/favorites" className="group rounded-xl border bg-card hover:bg-accent/50 transition-colors p-4 flex items-center gap-3 shadow-sm">
                   <div className="h-10 w-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center">
                     <Heart size={18} />
@@ -313,6 +314,24 @@ const Profile = () => {
                   <div className="flex-1">
                     <div className="font-semibold">Mis Reseñas</div>
                     <div className="text-xs text-muted-foreground">Consulta tus calificaciones</div>
+                  </div>
+                </Link>
+                <Link to="/mis-reservas" className="group rounded-xl border bg-card hover:bg-accent/50 transition-colors p-4 flex items-center gap-3 shadow-sm">
+                  <div className="h-10 w-10 rounded-full bg-green-100 text-green-700 flex items-center justify-center">
+                    <Calendar size={18} />
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-semibold">Mis Reservas</div>
+                    <div className="text-xs text-muted-foreground">Como arrendatario</div>
+                  </div>
+                </Link>
+                <Link to="/owner/reservas" className="group rounded-xl border bg-card hover:bg-accent/50 transition-colors p-4 flex items-center gap-3 shadow-sm">
+                  <div className="h-10 w-10 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center">
+                    <Settings size={18} />
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-semibold">Reservas de mis barcos</div>
+                    <div className="text-xs text-muted-foreground">Como propietario</div>
                   </div>
                 </Link>
                 <Link to="/profile/validation" className="group rounded-xl border bg-card hover:bg-accent/50 transition-colors p-4 flex items-center gap-3 shadow-sm">

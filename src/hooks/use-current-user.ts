@@ -19,6 +19,9 @@ export type CurrentUser = {
   phoneVerified?: boolean;
   licenseStatus?: 'none' | 'pending' | 'approved' | 'rejected';
   licenseUrl?: string;
+  // reputation
+  rating?: number;
+  ratingCount?: number;
 };
 
 export const useCurrentUser = () => {
