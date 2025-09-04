@@ -23,7 +23,7 @@ interface Boat {
   name?: string;
   title?: string;
   description?: string;
-  // Puede ser string o GeoJSON/objeto con campos formateados
+  addressFormatted?: string;
   location?: any;
   city?: string;
   country?: string;
@@ -33,7 +33,7 @@ interface Boat {
   imageUrl?: string;
   image?: string;
   photos?: string[];
-  type?: string;
+  boatType?: string;
   brand?: string;
   model?: string;
   length?: number;
@@ -60,6 +60,7 @@ const BoatDetails = () => {
   const isValidEmail = useMemo(() => /^(?:[a-zA-Z0-9_'^&\/+{}!#$%*?`|~.-]+)@(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/.test(formEmail.trim()), [formEmail]);
   const isValidName = useMemo(() => formName.trim().length >= 2, [formName]);
   const isValidMessage = useMemo(() => formMessage.trim().length >= 10, [formMessage]);
+
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["boat", id],
@@ -324,6 +325,9 @@ const BoatDetails = () => {
     };
   }, [boat]);
 
+  console.log('boat', boat)
+
+
   return (
     <div className="relative min-h-screen isolate">
       {/* Background */}
@@ -405,7 +409,7 @@ const BoatDetails = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Tipo</span>
-                    <span className="flex items-center gap-1"><Ship className="h-4 w-4" /> {boat?.type || '—'}</span>
+                    <span className="flex items-center gap-1"><Ship className="h-4 w-4" /> {boat?.boatType || '—'}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Capacidad</span>
@@ -572,7 +576,7 @@ const BoatDetails = () => {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Tipo</span>
-                  <span className="flex items-center gap-1"><Ship className="h-4 w-4" /> {boat?.type || '—'}</span>
+                  <span className="flex items-center gap-1"><Ship className="h-4 w-4" /> {boat?.boatType || '—'}</span>
                 </div>
                 <div className="pt-2 border-t">
                   <div className="text-base">

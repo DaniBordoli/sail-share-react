@@ -49,7 +49,7 @@ export const Header = () => {
   };
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-[60] backdrop-blur-md border-b transition-colors duration-300 ${
+    <header className={`fixed top-0 left-0 right-0 z-[1000] backdrop-blur-md border-b transition-colors duration-300 ${
       scrolled ? 'bg-slate-900/70 shadow-lg border-transparent' : 'bg-white/10 border-white/20'
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -115,7 +115,7 @@ export const Header = () => {
                 <Menu size={24} />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="bg-white/95 backdrop-blur-lg z-[80]">
+            <SheetContent side="right" className="bg-white/95 backdrop-blur-lg z-[1100]">
               <div className="flex flex-col space-y-6 pt-6">
                 {/* Mobile Logo */}
                 <Link to="/" onClick={() => setIsOpen(false)} className="flex items-center gap-3 pb-6 border-b cursor-pointer select-none">

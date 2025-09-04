@@ -91,7 +91,7 @@ export default function MyBoatMapPicker({ value, onChange, onAddressChange, clas
   };
 
   return (
-    <div className={className}>
+    <div className={`relative map-picker ${className || ''}`}>
       <div className="flex items-center justify-between mb-2">
         <div className="text-sm text-muted-foreground">Arrastra el marcador o haz clic en el mapa para ajustar la ubicación.</div>
         <Button variant="outline" size="sm" onClick={useMyLocation}>Usar mi ubicación</Button>
