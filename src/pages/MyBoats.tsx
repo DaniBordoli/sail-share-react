@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import LocationAutocomplete, { LocationSuggestion } from "@/components/LocationAutocomplete";
 import MyBoatMapPicker from "@/components/MyBoatMapPicker";
 import { toast } from "sonner";
+import { Link } from "react-router-dom";
 
 // Helper: upload multiple photos to Cloudinary (unsigned)
 async function uploadPhotos(files: File[]): Promise<string[]> {
@@ -389,6 +390,9 @@ export default function MyBoats() {
                               </div>
                             )}
                             <div className="flex flex-col sm:flex-row gap-2 mt-2">
+                              <Button className="w-full sm:w-auto" size="sm" asChild>
+                                <Link to={`/barcos/${b._id || b.id}`}>Ver detalle</Link>
+                              </Button>
                               <Button className="w-full sm:w-auto" size="sm" variant="outline" onClick={() => onEdit(b)}>Editar</Button>
                               <Button className="w-full sm:w-auto" size="sm" variant="outline" onClick={() => onToggleActive(b)}>{b.isActive ? 'Desactivar' : 'Activar'}</Button>
                               {(b.status === 'draft' || b.status === 'rejected') && (

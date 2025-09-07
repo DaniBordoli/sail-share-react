@@ -355,7 +355,7 @@ const BoatDetails = () => {
           </nav>
           <div className="flex items-start justify-between gap-4">
             <h1 className="text-3xl md:text-4xl font-bold text-white">{getName(boat)}</h1>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
               <Button variant="secondary" className="bg-white/90 hover:bg-white" onClick={handleShare}>
                 <Share2 className="h-4 w-4 mr-2" /> Compartir
               </Button>

@@ -334,15 +334,6 @@ const Profile = () => {
                     <div className="text-xs text-muted-foreground">Como propietario</div>
                   </div>
                 </Link>
-                <Link to="/profile/validation" className="group rounded-xl border bg-card hover:bg-accent/50 transition-colors p-4 flex items-center gap-3 shadow-sm">
-                  <div className="h-10 w-10 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center">
-                    <Settings size={18} />
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-semibold">Validar Perfil</div>
-                    <div className="text-xs text-muted-foreground">Sube tu licencia</div>
-                  </div>
-                </Link>
                 {user?.role === 'admin' && (
                   <Link to="/admin" className="group rounded-xl border bg-card hover:bg-accent/50 transition-colors p-4 flex items-center gap-3 shadow-sm">
                     <div className="h-10 w-10 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center">
