@@ -572,9 +572,9 @@ const SearchBoats = () => {
                             </CardTitle>
                           </CardHeader>
                           <CardContent className="pt-0 text-sm text-muted-foreground">
-                            <div className="flex items-center gap-2">
-                              <MapPin className="h-4 w-4" />
-                              <span>{boat.addressFormatted}</span>
+                            <div className="flex items-start gap-2 min-w-0 min-h-[2.5rem]">
+                              <MapPin className="h-4 w-4 shrink-0 mt-0.5" />
+                              <span className="line-clamp-2 break-words" title={String(boat.addressFormatted || '')}>{boat.addressFormatted}</span>
                             </div>
                             {(getOwnerName(boat)) && (
                               <div className="flex items-center gap-2 mt-2">
