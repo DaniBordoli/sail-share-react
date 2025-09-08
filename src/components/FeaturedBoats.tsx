@@ -217,20 +217,18 @@ export const FeaturedBoats = () => {
                   )}
                 </div>
 
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="text-lg font-semibold group-hover:text-primary transition-colors">
-                        {name}
-                      </CardTitle>
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
-                        <MapPin size={14} />
-                        {loc}
-                      </div>
-                    </div>
-                    <Badge variant="outline" className="text-xs">
+                <CardHeader className="pb-3 text-center">
+                  <div className="flex flex-col items-center gap-1 min-w-0">
+                    <CardTitle className="text-lg font-semibold group-hover:text-primary transition-colors truncate" title={String(name)}>
+                      {name}
+                    </CardTitle>
+                    <Badge variant="outline" className="text-xs w-fit">
                       {type}
                     </Badge>
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1 w-full">
+                      <MapPin size={14} className="shrink-0" />
+                      <span className="truncate min-w-0" title={String(loc)}>{loc}</span>
+                    </div>
                   </div>
                 </CardHeader>
 
