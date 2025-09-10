@@ -2,10 +2,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Star, Users, Anchor, MapPin, Heart } from "lucide-react";
-import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { getBoats } from "@/stores/slices/basicSlice";
+import { useEffect, useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getBoats, listMyFavorites } from "@/stores/slices/basicSlice";
 import { Link } from "react-router-dom";
+import { toggleFavorite as toggleFavoriteApi } from "@/stores/slices/basicSlice";
+import { toast } from "sonner";
+import { useCurrentUser } from "@/hooks/use-current-user";
 
 import boat1 from "@/assets/boats/boat-1.jpg";
 import boat2 from "@/assets/boats/boat-2.jpg";
@@ -96,12 +99,28 @@ const featuredBoats: Array<Required<Pick<BoatLike,
 
 export const FeaturedBoats = () => {
   const [favorites, setFavorites] = useState<string[]>([]);
+  const { user } = useCurrentUser();
+  const queryClient = useQueryClient();
 
   // Traer barcos reales; si falla, usamos dummy
   const { data } = useQuery({
     queryKey: ["featured-boats"],
     queryFn: async () => getBoats(),
   });
+
+  // Cargar favoritos del usuario autenticado
+  const { data: myFavs } = useQuery({
+    queryKey: ["my-favorites"],
+    queryFn: async () => listMyFavorites(),
+    enabled: !!user?._id,
+  });
+
+  useEffect(() => {
+    if (myFavs && Array.isArray(myFavs.items)) {
+      const ids = myFavs.items.map((b:any)=> String(b?._id || b?.id)).filter(Boolean);
+      setFavorites(ids);
+    }
+  }, [myFavs]);
 
   const realBoats: BoatLike[] = useMemo(() => {
     // API puede devolver { success, data } o array directo (mock/local)
@@ -128,12 +147,26 @@ export const FeaturedBoats = () => {
     return cc || 'Ubicación';
   };
 
-  const toggleFavorite = (boatId: string) => {
-    setFavorites(prev => 
-      prev.includes(boatId) 
-        ? prev.filter(id => id !== boatId)
-        : [...prev, boatId]
-    );
+  const toggleFavorite = async (boatId: string) => {
+    if (!user?._id) {
+      toast.info("Inicia sesión para guardar favoritos");
+      return;
+    }
+    if (!realBoats.length) {
+      toast.info("Los favoritos requieren barcos reales");
+      return;
+    }
+    // Optimistic update
+    setFavorites(prev => prev.includes(boatId) ? prev.filter(id => id !== boatId) : [...prev, boatId]);
+    try {
+      await toggleFavoriteApi(boatId);
+      // Mantener consistencia con otras vistas (Detalle, Favoritos)
+      queryClient.invalidateQueries({ queryKey: ["my-favorites"] });
+    } catch (err: any) {
+      // Revert on error
+      setFavorites(prev => prev.includes(boatId) ? prev.filter(id => id !== boatId) : [...prev, boatId]);
+      toast.error(err?.message || "No se pudo actualizar el favorito");
+    }
   };
 
   return (

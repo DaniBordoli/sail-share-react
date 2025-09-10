@@ -224,6 +224,11 @@ const Profile = () => {
                       Licencia rechazada
                     </Badge>
                   )}
+                  {user?.licenseStatus === 'none' && (
+                    <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
+                      Licencia no cargada
+                    </Badge>
+                  )}
                   {user?.phoneVerified && (
                     <Badge className="bg-green-600 text-white border-green-600 flex items-center gap-1">
                       <Phone size={14} />
@@ -334,6 +339,17 @@ const Profile = () => {
                     <div className="text-xs text-muted-foreground">Como propietario</div>
                   </div>
                 </Link>
+                {user?.licenseStatus !== 'approved' && (
+                  <Link to="/profile/validation" className="group rounded-xl border bg-card hover:bg-accent/50 transition-colors p-4 flex items-center gap-3 shadow-sm">
+                    <div className="h-10 w-10 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center">
+                      <Settings size={18} />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-semibold">Validar Perfil</div>
+                      <div className="text-xs text-muted-foreground">Sube tu licencia</div>
+                    </div>
+                  </Link>
+                )}
                 {user?.role === 'admin' && (
                   <Link to="/admin" className="group rounded-xl border bg-card hover:bg-accent/50 transition-colors p-4 flex items-center gap-3 shadow-sm">
                     <div className="h-10 w-10 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center">

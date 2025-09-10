@@ -5,7 +5,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MapPin, Star, Users, Ship, Share2, Link as LinkIcon, User, BadgeCheck, Heart } from "lucide-react";
+import { MapPin, Star, Users, Ship, Share2, Link as LinkIcon, User, BadgeCheck, Heart, ChevronLeft, ChevronRight } from "lucide-react";
 import heroImage from "@/assets/hero-yacht.jpg";
 import { contactOwner, getBoatById, toggleFavorite, listMyFavorites } from "@/stores/slices/basicSlice";
 import { mockBoats } from "@/data/mockBoats";
@@ -57,6 +57,8 @@ const BoatDetails = () => {
   const [formName, setFormName] = useState("");
   const [formEmail, setFormEmail] = useState("");
   const [formMessage, setFormMessage] = useState("");
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [openLightbox, setOpenLightbox] = useState(false);
   const isValidEmail = useMemo(() => /^(?:[a-zA-Z0-9_'^&\/+{}!#$%*?`|~.-]+)@(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/.test(formEmail.trim()), [formEmail]);
   const isValidName = useMemo(() => formName.trim().length >= 2, [formName]);
   const isValidMessage = useMemo(() => formMessage.trim().length >= 10, [formMessage]);
@@ -275,6 +277,19 @@ const BoatDetails = () => {
   }, [reviewsResp, reviews, boat?.rating]);
   const reviewsCount = (reviewsResp as any)?.summary?.count ?? reviews.length;
 
+  // Fotos del barco para la galería (asegurar al menos 1)
+  const photos: string[] = useMemo(() => {
+    const list = Array.isArray(boat?.photos) ? boat!.photos.filter(Boolean) as string[] : [];
+    const primary = getImg(boat);
+    if (!list.length) return [primary];
+    // Asegurar que la principal esté incluida al inicio sin duplicados
+    const unique = Array.from(new Set([primary, ...list]));
+    return unique;
+  }, [boat]);
+
+  // Reset al cambiar de barco
+  useEffect(() => { setActiveIndex(0); }, [boat?._id, boat?.id]);
+
   useEffect(() => {
     const name = getName(boat);
     document.title = `${name} | Detalles del barco | boatbnb`;
@@ -324,9 +339,6 @@ const BoatDetails = () => {
       document.head.removeChild(script);
     };
   }, [boat]);
-
-  console.log('boat', boat)
-
 
   return (
     <div className="relative min-h-screen isolate">
@@ -380,14 +392,34 @@ const BoatDetails = () => {
         <section className="max-w-7xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
           <article className="lg:col-span-2">
             <Card variant="floating" className="overflow-hidden">
+              {/* Imagen principal clickeable */}
               <div className="aspect-video w-full overflow-hidden">
                 <img
-                  src={getImg(boat)}
-                  alt={`${getName(boat)} en ${getLocation(boat)} - foto principal`}
-                  className="h-full w-full object-cover"
+                  src={photos[activeIndex]}
+                  alt={`${getName(boat)} en ${getLocation(boat)} - foto ${activeIndex + 1}`}
+                  className="h-full w-full object-cover cursor-pointer"
                   loading="eager"
+                  onClick={() => setOpenLightbox(true)}
                 />
               </div>
+              {/* Miniaturas */}
+              {photos.length > 1 && (
+                <div className="px-4 py-3">
+                  <div className="flex gap-2 overflow-x-auto">
+                    {photos.map((src, i) => (
+                      <button
+                        key={`${src}-${i}`}
+                        type="button"
+                        className={`h-16 w-24 rounded overflow-hidden`}
+                        onClick={() => setActiveIndex(i)}
+                        aria-label={`Ver imagen ${i + 1}`}
+                      >
+                        <img src={src} alt={`miniatura ${i + 1}`} className="h-full w-full object-cover" loading="lazy" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
               <CardHeader>
                 <CardTitle>Descripción</CardTitle>
               </CardHeader>
@@ -399,6 +431,50 @@ const BoatDetails = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Lightbox */}
+            <Dialog open={openLightbox} onOpenChange={setOpenLightbox}>
+              <DialogContent className="max-w-5xl">
+                <div className="relative">
+                  <img src={photos[activeIndex]} alt={`imagen ${activeIndex + 1}`} className="w-full h-auto object-contain" />
+                  {photos.length > 1 && (
+                    <>
+                      <button
+                        type="button"
+                        className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/80 shadow hover:bg-background"
+                        onClick={() => setActiveIndex((idx) => (idx - 1 + photos.length) % photos.length)}
+                        aria-label="Anterior"
+                      >
+                        <ChevronLeft className="h-5 w-5" />
+                      </button>
+                      <button
+                        type="button"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/80 shadow hover:bg-background"
+                        onClick={() => setActiveIndex((idx) => (idx + 1) % photos.length)}
+                        aria-label="Siguiente"
+                      >
+                        <ChevronRight className="h-5 w-5" />
+                      </button>
+                    </>
+                  )}
+                </div>
+                {photos.length > 1 && (
+                  <div className="mt-3 flex gap-2 overflow-x-auto">
+                    {photos.map((src, i) => (
+                      <button
+                        key={`lb-${src}-${i}`}
+                        type="button"
+                        className={`h-14 w-20 rounded overflow-hidden ${i === activeIndex ? 'ring-2 ring-primary' : 'border border-border'}`}
+                        onClick={() => setActiveIndex(i)}
+                        aria-label={`Ver imagen ${i + 1}`}
+                      >
+                        <img src={src} alt={`miniatura ${i + 1}`} className="h-full w-full object-cover" loading="lazy" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </DialogContent>
+            </Dialog>
 
             {/* Características y equipamiento */}
             <Card variant="floating" className="mt-6">
