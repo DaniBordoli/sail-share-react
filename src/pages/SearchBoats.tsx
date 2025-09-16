@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import heroImage from "@/assets/hero-yacht.jpg";
 import { mockBoats } from "@/data/mockBoats";
 import { Link, useSearchParams } from "react-router-dom";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetFooter } from "@/components/ui/sheet";
 import boatPlaceholder from "@/assets/hero-yacht.jpg";
 import ResultsMapAside from "@/components/results-map/ResultsMapAside";
 import { API_BASE_URL } from "@/lib/api";
@@ -62,10 +62,10 @@ const SearchBoats = () => {
   });
 
   // UI state
-  const [filtersOpen, setFiltersOpen] = useState<boolean>(false);
   const [sortBy, setSortBy] = useState<string>("");
   const [showMap, setShowMap] = useState<boolean>(false);
   const [areaResults, setAreaResults] = useState<any[] | null>(null);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   useEffect(() => {
     const qParam = searchParams.get('q') || searchParams.get('location') || '';
@@ -365,43 +365,18 @@ const SearchBoats = () => {
                 <Button variant="ghost" onClick={() => setQuery("")}>Limpiar</Button>
               )}
             </div>
-
-            {/* Filtros colapsables */}
-            <Collapsible
-              open={filtersOpen || activeFilters > 0}
-              onOpenChange={(open)=>{
-                setFiltersOpen(open);
-                if (!open) {
-                  setQuery("");
-                  setFilters({
-                    boatType: "",
-                    priceMin: "",
-                    priceMax: "",
-                    rentalType: "",
-                    passengers: "",
-                    yearMin: "",
-                    yearMax: "",
-                    brand: "",
-                    model: "",
-                    ratingMin: "",
-                  });
-                }
-              }}
-            >
-              <div className="flex items-center justify-between mt-6 mb-3">
-                <CollapsibleTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    {(filtersOpen || activeFilters > 0) ? 'Ocultar filtros' : 'Mostrar filtros'}
-                  </Button>
-                </CollapsibleTrigger>
-                <div className="text-sm text-white/80">
-                  {activeFilters > 0 ? `${activeFilters} filtros activos` : 'Sin filtros activos'}
-                </div>
-              </div>
-              <CollapsibleContent>
-                <Card className="mb-6 bg-white/95 backdrop-blur-lg">
-                  <CardContent className="pt-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Filtros: Mobile (Sheet) + Desktop (Aside) */}
+            <div className="mt-4 mb-4 flex items-center justify-between lg:justify-end gap-3">
+              <div className="lg:hidden">
+                <Sheet open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
+                  <SheetTrigger asChild>
+                    <Button variant="outline" size="sm">Filtros {activeFilters > 0 ? `(${activeFilters})` : ''}</Button>
+                  </SheetTrigger>
+                  <SheetContent side="left" className="w-[90vw] sm:w-[420px]">
+                    <SheetHeader>
+                      <SheetTitle>Filtros</SheetTitle>
+                    </SheetHeader>
+                    <div className="mt-4 space-y-4">
                       <div className="space-y-1">
                         <label className="text-xs font-medium text-muted-foreground">Tipo de embarcación</label>
                         <Select value={filters.boatType || 'all'} onValueChange={(v)=>setFilters(f=>({...f, boatType: v === 'all' ? '' : v}))}>
@@ -418,8 +393,7 @@ const SearchBoats = () => {
                           </SelectContent>
                         </Select>
                       </div>
-
-                      <div className="space-y-2 lg:col-span-2">
+                      <div className="space-y-2">
                         <div className="flex items-center justify-between">
                           <label className="text-xs font-medium text-muted-foreground">Precio (rango)</label>
                           <span className="text-xs text-muted-foreground">
@@ -437,7 +411,6 @@ const SearchBoats = () => {
                           }}
                         />
                       </div>
-
                       <div className="space-y-1">
                         <label className="text-xs font-medium text-muted-foreground">Tipo de rental</label>
                         <Select value={filters.rentalType || 'all'} onValueChange={(v)=>setFilters(f=>({...f, rentalType: v === 'all' ? '' : v}))}>
@@ -451,30 +424,30 @@ const SearchBoats = () => {
                           </SelectContent>
                         </Select>
                       </div>
-
                       <div className="space-y-1">
                         <label className="text-xs font-medium text-muted-foreground">Pasajeros</label>
                         <Input type="number" min={1} placeholder="Ej: 6" value={filters.passengers} onChange={(e)=>setFilters(f=>({...f, passengers: e.target.value}))} />
                       </div>
-
-                      <div className="space-y-1">
-                        <label className="text-xs font-medium text-muted-foreground">Año mínimo</label>
-                        <Input type="number" min={1900} max={new Date().getFullYear()} placeholder="2005" value={filters.yearMin} onChange={(e)=>setFilters(f=>({...f, yearMin: e.target.value}))} />
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                          <label className="text-xs font-medium text-muted-foreground">Año mínimo</label>
+                          <Input type="number" min={1900} max={new Date().getFullYear()} placeholder="2005" value={filters.yearMin} onChange={(e)=>setFilters(f=>({...f, yearMin: e.target.value}))} />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-xs font-medium text-muted-foreground">Año máximo</label>
+                          <Input type="number" min={1900} max={new Date().getFullYear()} placeholder="2024" value={filters.yearMax} onChange={(e)=>setFilters(f=>({...f, yearMax: e.target.value}))} />
+                        </div>
                       </div>
-                      <div className="space-y-1">
-                        <label className="text-xs font-medium text-muted-foreground">Año máximo</label>
-                        <Input type="number" min={1900} max={new Date().getFullYear()} placeholder="2024" value={filters.yearMax} onChange={(e)=>setFilters(f=>({...f, yearMax: e.target.value}))} />
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                          <label className="text-xs font-medium text-muted-foreground">Marca</label>
+                          <Input placeholder="Ej: Beneteau" value={filters.brand} onChange={(e)=>setFilters(f=>({...f, brand: e.target.value}))} />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-xs font-medium text-muted-foreground">Modelo</label>
+                          <Input placeholder="Ej: Oceanis" value={filters.model} onChange={(e)=>setFilters(f=>({...f, model: e.target.value}))} />
+                        </div>
                       </div>
-
-                      <div className="space-y-1">
-                        <label className="text-xs font-medium text-muted-foreground">Marca</label>
-                        <Input placeholder="Ej: Beneteau" value={filters.brand} onChange={(e)=>setFilters(f=>({...f, brand: e.target.value}))} />
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-xs font-medium text-muted-foreground">Modelo</label>
-                        <Input placeholder="Ej: Oceanis" value={filters.model} onChange={(e)=>setFilters(f=>({...f, model: e.target.value}))} />
-                      </div>
-
                       <div className="space-y-1">
                         <label className="text-xs font-medium text-muted-foreground">Reputación mínima</label>
                         <Select value={filters.ratingMin || 'all'} onValueChange={(v)=>setFilters(f=>({...f, ratingMin: v === 'all' ? '' : v}))}>
@@ -491,14 +464,19 @@ const SearchBoats = () => {
                         </Select>
                       </div>
                     </div>
-
-                    <div className="flex justify-end mt-4">
-                      <Button variant="outline" size="sm" onClick={()=>{ setFilters({ boatType:"", priceMin:"", priceMax:"", rentalType:"", passengers:"", yearMin:"", yearMax:"", brand:"", model:"", ratingMin:"" }); }}>Limpiar filtros</Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </CollapsibleContent>
-            </Collapsible>
+                    <SheetFooter className="mt-4">
+                      <div className="flex w-full items-center justify-between gap-2">
+                        <Button variant="outline" size="sm" onClick={()=>{ setFilters({ boatType:"", priceMin:"", priceMax:"", rentalType:"", passengers:"", yearMin:"", yearMax:"", brand:"", model:"", ratingMin:"" }); }}>Limpiar</Button>
+                        <Button size="sm" onClick={()=> setMobileFiltersOpen(false)}>Aplicar</Button>
+                      </div>
+                    </SheetFooter>
+                  </SheetContent>
+                </Sheet>
+              </div>
+              <div className="text-sm text-white/80">
+                {activeFilters > 0 ? `${activeFilters} filtros activos` : 'Sin filtros activos'}
+              </div>
+            </div>
 
             {isLoading ? (
               <p className="text-white/90">Cargando embarcaciones…</p>
@@ -507,142 +485,247 @@ const SearchBoats = () => {
                 {isError && (
                   <p className="mb-3 text-yellow-100">No se pudo conectar con la API. Mostrando barcos de demostración.</p>
                 )}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-                  <p className="text-white/90">{sorted.length} resultados</p>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-white/80">Ordenar por</span>
-                    <Select value={sortBy} onValueChange={(v)=>setSortBy(v)}>
-                      <SelectTrigger className="w-[220px]">
-                        <SelectValue placeholder="Relevancia" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="relevance">Relevancia</SelectItem>
-                        <SelectItem value="price_asc">Precio: menor a mayor</SelectItem>
-                        <SelectItem value="price_desc">Precio: mayor a menor</SelectItem>
-                        <SelectItem value="rating_desc">Rating: mayor a menor</SelectItem>
-                        <SelectItem value="capacity_desc">Capacidad: mayor a menor</SelectItem>
-                        <SelectItem value="year_desc">Año: más nuevo</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Button variant={showMap ? "default" : "outline"} onClick={()=>setShowMap(v=>!v)}>
-                      {showMap ? 'Ocultar mapa' : 'Ver mapa'}
-                    </Button>
-                  </div>
-                </div>
-                {areaResults && (
-                  <div className="mb-3 flex items-center justify-between gap-3">
-                    <div className="px-3 py-2 rounded-md bg-white/90 text-sm shadow-floating">
-                      Mostrando resultados en el área del mapa: <strong>{areaSorted.length}</strong> barcos
-                    </div>
-                    <Button size="sm" variant="outline" onClick={()=>setAreaResults(null)}>
-                      Quitar filtro de mapa
-                    </Button>
-                  </div>
-                )}
-                <div className={showMap ? "grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-6" : "grid grid-cols-1"}>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {(areaResults ? areaSorted : sorted).map((boat) => (
-                      <article key={getId(boat)} className="group">
-                        <Card variant="floating" className="overflow-hidden">
-                          <div className="aspect-video w-full overflow-hidden">
-                            <Link to={`/barcos/${getId(boat)}`}>
-                              <img
-                                src={getImg(boat)}
-                                alt={`${getName(boat)} en ${getLocation(boat)} - alquiler de barcos`}
-                                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                loading="lazy"
-                              />
-                            </Link>
+                <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6">
+                  {/* Desktop filters aside */}
+                  <aside className="hidden lg:block sticky top-24 self-start">
+                    <Card className="bg-white/95 backdrop-blur-lg">
+                      <CardHeader>
+                        <CardTitle>Filtros</CardTitle>
+                      </CardHeader>
+                      <CardContent className="pt-2 space-y-4">
+                        <div className="space-y-1">
+                          <label className="text-xs font-medium text-muted-foreground">Tipo de embarcación</label>
+                          <Select value={filters.boatType || 'all'} onValueChange={(v)=>setFilters(f=>({...f, boatType: v === 'all' ? '' : v}))}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Todos" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">Todos</SelectItem>
+                              <SelectItem value="Lancha">Lancha</SelectItem>
+                              <SelectItem value="Velero">Velero</SelectItem>
+                              <SelectItem value="Yate">Yate</SelectItem>
+                              <SelectItem value="Catamarán">Catamarán</SelectItem>
+                              <SelectItem value="Neumática">Neumática</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <label className="text-xs font-medium text-muted-foreground">Precio (rango)</label>
+                            <span className="text-xs text-muted-foreground">
+                              ${Number(filters.priceMin || priceBounds.min).toLocaleString()} - ${Number(filters.priceMax || priceBounds.max).toLocaleString()}
+                            </span>
                           </div>
-                          <CardHeader>
-                            <CardTitle className="flex items-start justify-between gap-3">
-                              <span className="truncate">{getName(boat)}</span>
-                              <div className="flex items-center gap-2 shrink-0">
-                                {(boat as any).type || (boat as any).boatType ? (
-                                  <Badge variant="outline" className="text-xs">
-                                    {(boat as any).type || (boat as any).boatType}
-                                  </Badge>
-                                ) : null}
-                                {boat.rating ? (
-                                  <span className="flex items-center gap-1 text-sm text-muted-foreground">
-                                    <Star className="h-4 w-4 text-yellow-500" /> {boat.rating.toFixed(1)}
-                                  </span>
-                                ) : null}
-                              </div>
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent className="pt-0 text-sm text-muted-foreground">
-                            <div className="flex items-center gap-2 min-w-0">
-                              <MapPin className="h-4 w-4 shrink-0" />
-                              <span className="truncate" title={String(boat.addressFormatted || '')}>{boat.addressFormatted}</span>
-                            </div>
-                            {(getOwnerName(boat)) && (
-                              <div className="flex items-center gap-2 mt-2">
-                                {getOwnerAvatar(boat) ? (
-                                  <img src={getOwnerAvatar(boat)} alt={getOwnerName(boat)} className="h-6 w-6 rounded-full object-cover" loading="lazy" />
-                                ) : (
-                                  <div className="h-6 w-6 rounded-full bg-muted" />
-                                )}
-                                <Link
-                                  to={`/explorar-barcos?owner=${encodeURIComponent(String((boat as any).ownerId || ''))}`}
-                                  className="hover:underline"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  {getOwnerName(boat)}
+                          <Slider
+                            value={[Number(filters.priceMin || priceBounds.min), Number(filters.priceMax || priceBounds.max)]}
+                            min={priceBounds.min}
+                            max={priceBounds.max}
+                            step={10}
+                            onValueChange={(vals)=>{
+                              const [min, max] = vals as number[];
+                              setFilters(f=>({...f, priceMin: String(min), priceMax: String(max)}));
+                            }}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-xs font-medium text-muted-foreground">Tipo de rental</label>
+                          <Select value={filters.rentalType || 'all'} onValueChange={(v)=>setFilters(f=>({...f, rentalType: v === 'all' ? '' : v}))}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Cualquiera" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">Cualquiera</SelectItem>
+                              <SelectItem value="day">Por día</SelectItem>
+                              <SelectItem value="week">Por semana</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-xs font-medium text-muted-foreground">Pasajeros</label>
+                          <Input type="number" min={1} placeholder="Ej: 6" value={filters.passengers} onChange={(e)=>setFilters(f=>({...f, passengers: e.target.value}))} />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-1">
+                            <label className="text-xs font-medium text-muted-foreground">Año mínimo</label>
+                            <Input type="number" min={1900} max={new Date().getFullYear()} placeholder="2005" value={filters.yearMin} onChange={(e)=>setFilters(f=>({...f, yearMin: e.target.value}))} />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-xs font-medium text-muted-foreground">Año máximo</label>
+                            <Input type="number" min={1900} max={new Date().getFullYear()} placeholder="2024" value={filters.yearMax} onChange={(e)=>setFilters(f=>({...f, yearMax: e.target.value}))} />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-1">
+                            <label className="text-xs font-medium text-muted-foreground">Marca</label>
+                            <Input placeholder="Ej: Beneteau" value={filters.brand} onChange={(e)=>setFilters(f=>({...f, brand: e.target.value}))} />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-xs font-medium text-muted-foreground">Modelo</label>
+                            <Input placeholder="Ej: Oceanis" value={filters.model} onChange={(e)=>setFilters(f=>({...f, model: e.target.value}))} />
+                          </div>
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-xs font-medium text-muted-foreground">Reputación mínima</label>
+                          <Select value={filters.ratingMin || 'all'} onValueChange={(v)=>setFilters(f=>({...f, ratingMin: v === 'all' ? '' : v}))}>
+                            <SelectTrigger>
+                              <SelectValue placeholder=">= 0" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">Todas</SelectItem>
+                              <SelectItem value="3">≥ 3.0</SelectItem>
+                              <SelectItem value="3.5">≥ 3.5</SelectItem>
+                              <SelectItem value="4">≥ 4.0</SelectItem>
+                              <SelectItem value="4.5">≥ 4.5</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex justify-end">
+                          <Button variant="outline" size="sm" onClick={()=>{ setFilters({ boatType:"", priceMin:"", priceMax:"", rentalType:"", passengers:"", yearMin:"", yearMax:"", brand:"", model:"", ratingMin:"" }); }}>Limpiar filtros</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </aside>
+
+                  {/* Results column */}
+                  <div>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                      <p className="text-white/90">{sorted.length} resultados</p>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-white/80">Ordenar por</span>
+                        <Select value={sortBy} onValueChange={(v)=>setSortBy(v)}>
+                          <SelectTrigger className="w-[220px]">
+                            <SelectValue placeholder="Relevancia" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="relevance">Relevancia</SelectItem>
+                            <SelectItem value="price_asc">Precio: menor a mayor</SelectItem>
+                            <SelectItem value="price_desc">Precio: mayor a menor</SelectItem>
+                            <SelectItem value="rating_desc">Rating: mayor a menor</SelectItem>
+                            <SelectItem value="capacity_desc">Capacidad: mayor a menor</SelectItem>
+                            <SelectItem value="year_desc">Año: más nuevo</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Button variant={showMap ? "default" : "outline"} onClick={()=>setShowMap(v=>!v)}>
+                          {showMap ? 'Ocultar mapa' : 'Ver mapa'}
+                        </Button>
+                      </div>
+                    </div>
+                    {areaResults && (
+                      <div className="mb-3 flex items-center justify-between gap-3">
+                        <div className="px-3 py-2 rounded-md bg-white/90 text-sm shadow-floating">
+                          Mostrando resultados en el área del mapa: <strong>{areaSorted.length}</strong> barcos
+                        </div>
+                        <Button size="sm" variant="outline" onClick={()=>setAreaResults(null)}>
+                          Quitar filtro de mapa
+                        </Button>
+                      </div>
+                    )}
+                    <div className={showMap ? "grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-6" : "grid grid-cols-1"}>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {(areaResults ? areaSorted : sorted).map((boat) => (
+                          <article key={getId(boat)} className="group">
+                            <Card variant="floating" className="overflow-hidden">
+                              <div className="aspect-video w-full overflow-hidden">
+                                <Link to={`/barcos/${getId(boat)}`}>
+                                  <img
+                                    src={getImg(boat)}
+                                    alt={`${getName(boat)} en ${getLocation(boat)} - alquiler de barcos`}
+                                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                    loading="lazy"
+                                  />
                                 </Link>
                               </div>
-                            )}
-                            <div className="flex items-center gap-4 mt-2">
-                              <div className="flex items-center gap-1">
-                                <Users className="h-4 w-4" />
-                                <span>{boat.capacity ?? "-"}</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Anchor className="h-4 w-4" />
-                                <span>{(boat as any).length ?? "-"}</span>
-                              </div>
-                            </div>
-                          </CardContent>
-                          <CardFooter className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                            <div className="text-sm w-full sm:w-auto">
-                              <span className="text-muted-foreground">Desde</span>{" "}
-                              <span className="font-semibold">{boat.price ? `$${boat.price}` : "Consultar"}</span>{" "}
-                              <span className="text-muted-foreground">{((boat as any).priceUnit === 'week') ? '/ semana' : '/ día'}</span>
-                            </div>
-                            <Button className="w-full sm:w-auto" variant="ocean" size="sm" asChild>
-                              <Link to={`/barcos/${getId(boat)}`}>Ver detalles</Link>
-                            </Button>
-                          </CardFooter>
-                        </Card>
-                      </article>
-                    ))}
-                  </div>
+                              <CardHeader>
+                                <CardTitle className="flex items-start justify-between gap-3">
+                                  <span className="truncate">{getName(boat)}</span>
+                                  <div className="flex items-center gap-2 shrink-0">
+                                    {(boat as any).type || (boat as any).boatType ? (
+                                      <Badge variant="outline" className="text-xs">
+                                        {(boat as any).type || (boat as any).boatType}
+                                      </Badge>
+                                    ) : null}
+                                    {boat.rating ? (
+                                      <span className="flex items-center gap-1 text-sm text-muted-foreground">
+                                        <Star className="h-4 w-4 text-yellow-500" /> {boat.rating.toFixed(1)}
+                                      </span>
+                                    ) : null}
+                                  </div>
+                                </CardTitle>
+                              </CardHeader>
+                              <CardContent className="pt-0 text-sm text-muted-foreground">
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <MapPin className="h-4 w-4 shrink-0" />
+                                  <span className="truncate" title={String(boat.addressFormatted || '')}>{boat.addressFormatted}</span>
+                                </div>
+                                {(getOwnerName(boat)) && (
+                                  <div className="flex items-center gap-2 mt-2">
+                                    {getOwnerAvatar(boat) ? (
+                                      <img src={getOwnerAvatar(boat)} alt={getOwnerName(boat)} className="h-6 w-6 rounded-full object-cover" loading="lazy" />
+                                    ) : (
+                                      <div className="h-6 w-6 rounded-full bg-muted" />
+                                    )}
+                                    <Link
+                                      to={`/explorar-barcos?owner=${encodeURIComponent(String((boat as any).ownerId || ''))}`}
+                                      className="hover:underline"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      {getOwnerName(boat)}
+                                    </Link>
+                                  </div>
+                                )}
+                                <div className="flex items-center gap-4 mt-2">
+                                  <div className="flex items-center gap-1">
+                                    <Users className="h-4 w-4" />
+                                    <span>{boat.capacity ?? "-"}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <Anchor className="h-4 w-4" />
+                                    <span>{(boat as any).length ?? "-"}</span>
+                                  </div>
+                                </div>
+                              </CardContent>
+                              <CardFooter className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                <div className="text-sm w-full sm:w-auto">
+                                  <span className="text-muted-foreground">Desde</span>{" "}
+                                  <span className="font-semibold">{boat.price ? `$${boat.price}` : "Consultar"}</span>{" "}
+                                  <span className="text-muted-foreground">{((boat as any).priceUnit === 'week') ? '/ semana' : '/ día'}</span>
+                                </div>
+                                <Button className="w-full sm:w-auto" variant="ocean" size="sm" asChild>
+                                  <Link to={`/barcos/${getId(boat)}`}>Ver detalles</Link>
+                                </Button>
+                              </CardFooter>
+                            </Card>
+                          </article>
+                        ))}
+                      </div>
 
-                  {showMap && (
-                    <aside className="h-[70vh] sticky top-24">
-                      <ResultsMapAside
-                        boats={(areaResults ? areaSorted : sorted) as any}
-                        onAskSearchInArea={async (b) => {
-                          try {
-                            const params = new URLSearchParams({
-                              north: String(b.north),
-                              south: String(b.south),
-                              east: String(b.east),
-                              west: String(b.west),
-                              limit: '120',
-                            });
-                            const resp = await fetch(`${API_BASE_URL}/api/boats/near?${params.toString()}`);
-                            const json = await resp.json();
-                            if (json?.success && Array.isArray(json.data)) {
-                              setAreaResults(json.data);
-                            }
-                          } catch (_) {
-                            // no-op
-                          }
-                        }}
-                      />
-                    </aside>
-                  )}
+                      {showMap && (
+                        <aside className="h-[70vh] sticky top-24">
+                          <ResultsMapAside
+                            boats={(areaResults ? areaSorted : sorted) as any}
+                            onAskSearchInArea={async (b) => {
+                              try {
+                                const params = new URLSearchParams({
+                                  north: String(b.north),
+                                  south: String(b.south),
+                                  east: String(b.east),
+                                  west: String(b.west),
+                                  limit: '120',
+                                });
+                                const resp = await fetch(`${API_BASE_URL}/api/boats/near?${params.toString()}`);
+                                const json = await resp.json();
+                                if (json?.success && Array.isArray(json.data)) {
+                                  setAreaResults(json.data);
+                                }
+                              } catch (_) {
+                                // no-op
+                              }
+                            }}
+                          />
+                        </aside>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </>
             )}

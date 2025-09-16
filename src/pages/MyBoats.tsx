@@ -120,6 +120,10 @@ export default function MyBoats() {
     description: '',
     price: '',
     priceUnit: 'day',
+    extrasCaptain: false,
+    extrasCaptainPrice: '',
+    extrasFuel: false,
+    extrasFuelPrice: '',
   });
 
   // Delete confirmation modal
@@ -144,6 +148,8 @@ export default function MyBoats() {
     description: 'Descripción',
     price: 'Precio',
     rentalTypes: 'Tipo de rental',
+    extrasCaptainPrice: 'Precio capitán',
+    extrasFuelPrice: 'Precio combustible',
   };
 
   const validateForm = (): string[] | null => {
@@ -163,6 +169,15 @@ export default function MyBoats() {
     for (const nk of ['capacity','enginePower','length','price']) {
       const v = Number((form as any)[nk]);
       if (Number.isNaN(v) || v <= 0) errs.push(`${fieldLabels[nk] || nk}: valor inválido o no positivo`);
+    }
+    // Validación de extras cuando están activos
+    if (form.extrasCaptain) {
+      const pc = Number(form.extrasCaptainPrice);
+      if (Number.isNaN(pc) || pc < 0) errs.push(`${fieldLabels['extrasCaptainPrice']}: debe ser un número ≥ 0`);
+    }
+    if (form.extrasFuel) {
+      const pf = Number(form.extrasFuelPrice);
+      if (Number.isNaN(pf) || pf < 0) errs.push(`${fieldLabels['extrasFuelPrice']}: debe ser un número ≥ 0`);
     }
     const phoneRegex = /^[+]?\d[\d\s()-]{6,}$/;
     if (!phoneRegex.test(String(form.contactNumber))) errs.push(`${fieldLabels['contactNumber']}: inválido`);
@@ -191,13 +206,18 @@ export default function MyBoats() {
         latitude: form.latitude ? Number(form.latitude) : undefined,
         longitude: form.longitude ? Number(form.longitude) : undefined,
         addressFormatted: form.addressFormatted || undefined,
+        // mapear extras opcionales
+        extras: {
+          captain: form.extrasCaptain ? { enabled: true, price: Number(form.extrasCaptainPrice || 0) } : { enabled: false },
+          fuel: form.extrasFuel ? { enabled: true, price: Number(form.extrasFuelPrice || 0) } : { enabled: false },
+        },
         photos,
       };
       const res = editId ? await updateBoat(editId, payload) : await createBoat(payload);
       if (res?.success) {
         setFormOpen(false);
         setEditId(null);
-        setForm({ name: '', rentalTypes: [], boatType: '', brand: '', model: '', buildYear: '', capacity: '', enginePower: '', length: '', contactNumber: '', city: '', latitude: '', longitude: '', addressFormatted: '', description: '', price: '', priceUnit: 'day' });
+        setForm({ name: '', rentalTypes: [], boatType: '', brand: '', model: '', buildYear: '', capacity: '', enginePower: '', length: '', contactNumber: '', city: '', latitude: '', longitude: '', addressFormatted: '', description: '', price: '', priceUnit: 'day', extrasCaptain:false, extrasCaptainPrice:'', extrasFuel:false, extrasFuelPrice:'' });
         setPhotosFiles([]);
         setExistingPhotos([]);
         await load();
@@ -232,6 +252,10 @@ export default function MyBoats() {
       description: b.description || '',
       price: String(b.price ?? ''),
       priceUnit: b.priceUnit || 'day',
+      extrasCaptain: Boolean((b as any)?.extras?.captain?.enabled) || Boolean((b as any)?.extrasCaptain),
+      extrasCaptainPrice: String((b as any)?.extras?.captain?.price ?? (b as any)?.extrasCaptainPrice ?? ''),
+      extrasFuel: Boolean((b as any)?.extras?.fuel?.enabled) || Boolean((b as any)?.extrasFuel),
+      extrasFuelPrice: String((b as any)?.extras?.fuel?.price ?? (b as any)?.extrasFuelPrice ?? ''),
     });
     setExistingPhotos(Array.isArray(b.photos) ? b.photos : []);
     setPhotosFiles([]);
@@ -606,6 +630,55 @@ export default function MyBoats() {
                             <SelectItem value="week">Por semana</SelectItem>
                           </SelectContent>
                         </Select>
+                      </div>
+
+                      {/* Extras opcionales */}
+                      <div className="md:col-span-2">
+                        <Label>Extras opcionales</Label>
+                        <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <label className="flex items-center justify-between border rounded-lg p-3">
+                            <div className="text-sm">
+                              <div className="font-medium">Capitán incluido</div>
+                              <div className="text-muted-foreground">Precio por reserva</div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Input
+                                type="number"
+                                className="w-28"
+                                placeholder="0"
+                                value={form.extrasCaptainPrice}
+                                onChange={(e)=> setForm((s:any)=> ({...s, extrasCaptainPrice: e.target.value}))}
+                                disabled={!form.extrasCaptain}
+                              />
+                              <input
+                                type="checkbox"
+                                checked={form.extrasCaptain}
+                                onChange={(e)=> setForm((s:any)=> ({...s, extrasCaptain: e.target.checked}))}
+                              />
+                            </div>
+                          </label>
+                          <label className="flex items-center justify-between border rounded-lg p-3">
+                            <div className="text-sm">
+                              <div className="font-medium">Combustible incluido</div>
+                              <div className="text-muted-foreground">Precio por reserva</div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Input
+                                type="number"
+                                className="w-28"
+                                placeholder="0"
+                                value={form.extrasFuelPrice}
+                                onChange={(e)=> setForm((s:any)=> ({...s, extrasFuelPrice: e.target.value}))}
+                                disabled={!form.extrasFuel}
+                              />
+                              <input
+                                type="checkbox"
+                                checked={form.extrasFuel}
+                                onChange={(e)=> setForm((s:any)=> ({...s, extrasFuel: e.target.checked}))}
+                              />
+                            </div>
+                          </label>
+                        </div>
                       </div>
 
                       <div className="md:col-span-2">

@@ -44,13 +44,21 @@ const BookingPage = () => {
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { user } = useCurrentUser();
+  const { user, loading } = useCurrentUser();
 
   const { data } = useQuery({
     queryKey: ["boat", id],
     queryFn: () => (id ? getBoatById(id) : Promise.resolve(undefined as any)),
     enabled: !!id,
   });
+
+  // Auth guard: if not logged in, send to login with redirect back here
+  useEffect(() => {
+    if (!loading && !user) {
+      const redirect = `${location.pathname}${location.search}`;
+      navigate(`/login?redirect=${encodeURIComponent(redirect)}`);
+    }
+  }, [loading, user, location.pathname, location.search, navigate]);
 
   const { data: blockedData } = useQuery({
     queryKey: ["boat-blocked", id],
@@ -201,11 +209,15 @@ const BookingPage = () => {
   }, []);
 
   const unit: 'day' | 'week' = (boat?.priceUnit === 'week') ? 'week' : 'day';
+  const offersCaptain = !!((boat as any)?.extras?.captain?.enabled);
+  const captainPrice = Number((boat as any)?.extras?.captain?.price ?? 0) || 0;
+  const offersFuel = !!((boat as any)?.extras?.fuel?.enabled);
+  const fuelPrice = Number((boat as any)?.extras?.fuel?.price ?? 0) || 0;
   const weeks = useMemo(() => unit === 'week' ? Math.max(0, Math.ceil((nights || 0) / 7)) : 0, [unit, nights]);
   const base = unit === 'week'
     ? (boat?.price || 0) * weeks
     : (boat?.price || 0) * (nights || 0);
-  const extrasTotal = (extras.captain ? 200 : 0) + (extras.fuel ? 100 : 0);
+  const extrasTotal = (offersCaptain && extras.captain ? captainPrice : 0) + (offersFuel && extras.fuel ? fuelPrice : 0);
   const rentalSurcharge = rentalType === 'with_captain' ? 200 : rentalType === 'owner_onboard' ? 150 : 0;
   const flexibleSurcharge = flexible ? Math.round(base * 0.1) : 0;
   const serviceFee = Math.round((base + extrasTotal + rentalSurcharge) * SERVICE_FEE_PCT);
@@ -556,20 +568,27 @@ const BookingPage = () => {
                 <CardTitle className="flex items-center gap-2"><Users className="h-5 w-5" /> Servicios adicionales</CardTitle>
               </CardHeader>
               <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <label className="flex items-center justify-between border rounded-lg p-3">
-                  <div className="text-sm">
-                    <div className="font-medium">Capitán incluido</div>
-                    <div className="text-muted-foreground">+200€ por reserva</div>
-                  </div>
-                  <input type="checkbox" checked={extras.captain} onChange={(e)=> setExtras(s => ({...s, captain: e.target.checked}))} />
-                </label>
-                <label className="flex items-center justify-between border rounded-lg p-3">
-                  <div className="text-sm">
-                    <div className="font-medium">Combustible incluido</div>
-                    <div className="text-muted-foreground">+100€ por reserva</div>
-                  </div>
-                  <input type="checkbox" checked={extras.fuel} onChange={(e)=> setExtras(s => ({...s, fuel: e.target.checked}))} />
-                </label>
+                {offersCaptain && (
+                  <label className="flex items-center justify-between border rounded-lg p-3">
+                    <div className="text-sm">
+                      <div className="font-medium">Capitán incluido</div>
+                      <div className="text-muted-foreground">+{captainPrice}€ por reserva</div>
+                    </div>
+                    <input type="checkbox" checked={extras.captain} onChange={(e)=> setExtras(s => ({...s, captain: e.target.checked}))} />
+                  </label>
+                )}
+                {offersFuel && (
+                  <label className="flex items-center justify-between border rounded-lg p-3">
+                    <div className="text-sm">
+                      <div className="font-medium">Combustible incluido</div>
+                      <div className="text-muted-foreground">+{fuelPrice}€ por reserva</div>
+                    </div>
+                    <input type="checkbox" checked={extras.fuel} onChange={(e)=> setExtras(s => ({...s, fuel: e.target.checked}))} />
+                  </label>
+                )}
+                {!offersCaptain && !offersFuel && (
+                  <div className="text-sm text-muted-foreground">Este barco no ofrece servicios adicionales.</div>
+                )}
               </CardContent>
             </Card>
           </div>

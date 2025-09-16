@@ -6,8 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Anchor, Mail, Lock, Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { loginUser, loginWithGoogle, loginWithFacebook, resendVerificationEmail } from "@/stores/slices/basicSlice";
 import { useToast } from "@/hooks/use-toast";
 import heroImage from "@/assets/hero-yacht.jpg";
@@ -24,6 +24,45 @@ const Login = () => {
     rememberMe: false
   });
   const navigate = useNavigate();
+  const location = useLocation();
+  const getRedirectParam = () => {
+    try {
+      const params = new URLSearchParams(location.search);
+      const r = params.get('redirect');
+      return r && r.startsWith('/') ? r : '';
+    } catch {
+      return '';
+    }
+  };
+  // Persist redirect across OAuth redirects
+  useEffect(() => {
+    const r = getRedirectParam();
+    if (r) {
+      try { sessionStorage.setItem('loginRedirect', r); } catch {}
+    }
+  }, [location.search]);
+  // Si ya hay sesión activa (token), redirigir inmediatamente
+  useEffect(() => {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (token) {
+        const to = resolveRedirect();
+        sessionStorage.removeItem('loginRedirect');
+        navigate(to);
+      }
+    } catch {}
+  }, []);
+  const resolveRedirect = (): string => {
+    try {
+      const r = getRedirectParam();
+      if (r) return r;
+      const stored = sessionStorage.getItem('loginRedirect');
+      return stored && stored.startsWith('/') ? stored : '/';
+    } catch {
+      return '/';
+    }
+  };
+
   const { toast } = useToast();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,7 +116,10 @@ const Login = () => {
         if (formData.rememberMe) {
           localStorage.setItem('userSession', JSON.stringify((response as any).data ?? null));
         }
-        navigate("/");
+        const to = resolveRedirect();
+        try { sessionStorage.removeItem('loginRedirect'); } catch {}
+        navigate(to);
+
       } else {
         if (response.code === 'EMAIL_NOT_VERIFIED') {
           setVerifyNeeded(true);
@@ -224,7 +266,13 @@ const Login = () => {
                 <Button 
                   variant="outline" 
                   className="gap-2"
-                  onClick={loginWithGoogle}
+                  onClick={() => {
+                    try {
+                      const r = getRedirectParam();
+                      if (r) sessionStorage.setItem('loginRedirect', r);
+                    } catch {}
+                    loginWithGoogle();
+                  }}
                   type="button"
                 >
                   <svg className="h-4 w-4" viewBox="0 0 24 24">
@@ -238,7 +286,13 @@ const Login = () => {
                 <Button 
                   variant="outline" 
                   className="gap-2"
-                  onClick={loginWithFacebook}
+                  onClick={() => {
+                    try {
+                      const r = getRedirectParam();
+                      if (r) sessionStorage.setItem('loginRedirect', r);
+                    } catch {}
+                    loginWithFacebook();
+                  }}
                   type="button"
                 >
                   <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
