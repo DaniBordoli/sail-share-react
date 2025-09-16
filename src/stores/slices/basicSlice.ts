@@ -659,8 +659,14 @@ export const resendVerificationEmail = async (email: string): Promise<ApiRespons
 
 
 export const loginWithGoogle = () => {
+  // Try to read intended redirect stored by Login.tsx
+  let redirect = '/';
+  try {
+    const r = sessionStorage.getItem('loginRedirect');
+    if (r && r.startsWith('/')) redirect = r;
+  } catch {}
   const popup = window.open(
-    `${API_BASE_URL}/api/auth/google`,
+    `${API_BASE_URL}/api/auth/google${redirect && redirect !== '/' ? `?redirect=${encodeURIComponent(redirect)}` : ''}`,
     'googleLogin',
     'width=500,height=600,scrollbars=yes,resizable=yes'
   );
@@ -684,7 +690,14 @@ export const loginWithGoogle = () => {
       localStorage.setItem('authToken', event.data.token);
       
       popup?.close();
-      window.location.href = '/';
+      // Navigate to stored redirect or fallback to home
+      let target = '/';
+      try {
+        const stored = sessionStorage.getItem('loginRedirect');
+        if (stored && stored.startsWith('/')) target = stored;
+        sessionStorage.removeItem('loginRedirect');
+      } catch {}
+      window.location.href = target;
       
       window.removeEventListener('message', handleMessage);
     }
@@ -700,8 +713,14 @@ export const loginWithGoogle = () => {
   }, 1000);
 }
 export const loginWithFacebook = () => {
+  // Try to read intended redirect stored by Login.tsx
+  let redirect = '/';
+  try {
+    const r = sessionStorage.getItem('loginRedirect');
+    if (r && r.startsWith('/')) redirect = r;
+  } catch {}
   const popup = window.open(
-    `${API_BASE_URL}/api/auth/facebook`,
+    `${API_BASE_URL}/api/auth/facebook${redirect && redirect !== '/' ? `?redirect=${encodeURIComponent(redirect)}` : ''}`,
     'facebookLogin',
     'width=500,height=600,scrollbars=yes,resizable=yes'
   );
@@ -727,7 +746,14 @@ export const loginWithFacebook = () => {
       localStorage.setItem('authToken', event.data.token);
       
       popup?.close();
-      window.location.href = '/';
+      // Navigate to stored redirect or fallback to home
+      let target = '/';
+      try {
+        const stored = sessionStorage.getItem('loginRedirect');
+        if (stored && stored.startsWith('/')) target = stored;
+        sessionStorage.removeItem('loginRedirect');
+      } catch {}
+      window.location.href = target;
       
       window.removeEventListener('message', handleMessage);
     }

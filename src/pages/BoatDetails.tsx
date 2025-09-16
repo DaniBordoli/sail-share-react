@@ -662,7 +662,7 @@ const BoatDetails = () => {
                   </div>
                   <div className="mt-3">
                     <Button variant="ocean" size="lg" asChild>
-                      <Link to={`/barcos/${id}/reservar`}>Solicitar reserva</Link>
+                      <Link to={user?._id ? `/barcos/${id}/reservar` : `/login?redirect=${encodeURIComponent(`/barcos/${id}/reservar`)}`}>Solicitar reserva</Link>
                     </Button>
                   </div>
                   <div className="mt-3">

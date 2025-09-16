@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar, MapPin, Anchor, Users } from "lucide-react";
+import LocationAutocomplete, { LocationSuggestion } from "@/components/LocationAutocomplete";
 import heroImage from "@/assets/hero-yacht.jpg";
 import heroVideo from "@/assets/hero-video.mp4";
 
@@ -20,10 +21,13 @@ export const HeroSection = () => {
 
   const handleSearch = () => {
     const params = new URLSearchParams();
-    const qParts = [searchData.location, searchData.boatType].filter(Boolean);
+    const qParts = [
+      searchData.location,
+      searchData.boatType && searchData.boatType !== 'all' ? searchData.boatType : ''
+    ].filter(Boolean);
     if (qParts.length) params.set('q', qParts.join(' '));
     if (searchData.location) params.set('location', searchData.location);
-    if (searchData.boatType) params.set('boatType', searchData.boatType);
+    if (searchData.boatType && searchData.boatType !== 'all') params.set('boatType', searchData.boatType);
     if (searchData.startDate) params.set('startDate', searchData.startDate);
     if (searchData.endDate) params.set('endDate', searchData.endDate);
     if (searchData.guests) params.set('guests', searchData.guests);
@@ -45,8 +49,8 @@ export const HeroSection = () => {
         >
           <source src={heroVideo} type="video/mp4" />
         </video>
-        <div className="absolute inset-0 bg-gradient-hero opacity-60"></div>
-        <div className="absolute inset-0 bg-black/20"></div>
+        {/* <div className="absolute inset-0 bg-gradient-hero opacity-60"></div> */}
+        {/* <div className="absolute inset-0 bg-black/20"></div> */}
       </div>
 
       {/* Floating Elements */}
@@ -60,11 +64,11 @@ export const HeroSection = () => {
       {/* Main Content */}
       <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-24">
         <div className="text-center mb-12">
-          <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight">
+          <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight drop-shadow-[0_3px_10px_rgba(0,0,0,0.9)]">
           Alquila tu barco en minutos,
             <span className="block bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">en cualquier destino</span>
           </h1>
-          <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed drop-shadow-[0_2px_6px_rgba(0,0,0,0.7)]">
           Más de 50,000 barcos y yates en todo el mundo. Reserva fácil, segura y con precios transparentes.
           </p>
           <div className="flex items-center justify-center gap-2 text-white/80 mb-8">
@@ -87,11 +91,14 @@ export const HeroSection = () => {
                   <MapPin size={16} />
                   Destino
                 </label>
-                <Input
-                  placeholder="¿Dónde quieres navegar?"
-                  value={searchData.location}
-                  onChange={(e) => setSearchData({...searchData, location: e.target.value})}
-                  className="border-muted focus:border-primary"
+                <LocationAutocomplete
+                  placeholder="Escribe una ciudad, puerto o dirección"
+                  onSelect={(loc: LocationSuggestion) => {
+                    setSearchData({
+                      ...searchData,
+                      location: loc.city || loc.formatted || "",
+                    });
+                  }}
                 />
               </div>
 
@@ -133,6 +140,7 @@ export const HeroSection = () => {
                     <SelectValue placeholder="Elige tu embarcación" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="all">Todos</SelectItem>
                     <SelectItem value="Lancha">Lancha</SelectItem>
                     <SelectItem value="Velero">Velero</SelectItem>
                     <SelectItem value="Yate">Yate</SelectItem>
