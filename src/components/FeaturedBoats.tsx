@@ -163,14 +163,13 @@ export const FeaturedBoats = () => {
       // Mantener consistencia con otras vistas (Detalle, Favoritos)
       queryClient.invalidateQueries({ queryKey: ["my-favorites"] });
     } catch (err: any) {
-      // Revert on error
       setFavorites(prev => prev.includes(boatId) ? prev.filter(id => id !== boatId) : [...prev, boatId]);
       toast.error(err?.message || "No se pudo actualizar el favorito");
     }
   };
 
   return (
-    <section className="py-20 bg-gradient-sky">
+    <section className="py-20 bg-[#F2F2F2]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16">

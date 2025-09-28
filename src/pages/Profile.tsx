@@ -8,11 +8,11 @@ import { Separator } from "@/components/ui/separator";
 import { MapPin, Star, Calendar, Phone, Mail, Edit, Settings, Heart, Ship, Camera, BadgeCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { API_BASE_URL } from "@/lib/api";
-import { updateUserAuthorized, uploadUserAvatar } from "@/stores/slices/basicSlice";
+import { updateUserAuthorized, uploadUserAvatar, listMyBookings, listMyReviews, listMyFavorites } from "@/stores/slices/basicSlice";
 import { useCurrentUser } from "@/hooks/use-current-user";
 
 const Profile = () => {
@@ -28,6 +28,11 @@ const Profile = () => {
     phone: "",
     dniOrLicense: "",
     experienceDeclaration: "",
+    timeZone: "",
+    birthDate: "",
+    nationality: "",
+    languages: "",
+    address: "",
   });
 
   const userProfile = {
@@ -35,7 +40,10 @@ const Profile = () => {
     email: user?.email ?? "—",
     phone: user?.phone ?? "—",
     location: "—",
-    memberSince: "—",
+    memberSince: user?.createdAt ? new Date(user.createdAt).toLocaleDateString('es-ES', { 
+      year: 'numeric', 
+      month: 'long' 
+    }) : "—",
     avatar: user?.avatar || "/placeholder.svg",
     rating: user?.rating ?? 0,
     reviews: user?.ratingCount ?? 0,
@@ -118,32 +126,115 @@ const Profile = () => {
     }
   };
 
-  const recentActivity = [
-    {
-      id: 1,
-      type: "rental",
-      title: "Alquiler completado",
-      description: "Velero Oceanis 46.1 en Mallorca",
-      date: "15 Dic 2024",
-      status: "completado"
-    },
-    {
-      id: 2,
-      type: "review",
-      title: "Nueva reseña recibida",
-      description: "⭐⭐⭐⭐⭐ Excelente inquilino",
-      date: "12 Dic 2024",
-      status: "nuevo"
-    },
-    {
-      id: 3,
-      type: "favorite",
-      title: "Barco añadido a favoritos",
-      description: "Catamarán Lagoon 42 en Valencia",
-      date: "10 Dic 2024",
-      status: "nuevo"
-    }
-  ];
+  const [recentActivity, setRecentActivity] = useState<Array<{
+    id: string | number;
+    type: 'rental' | 'review' | 'favorite';
+    title: string;
+    description: string;
+    date: string;
+  }>>([]);
+
+  useEffect(() => {
+    let mounted = true;
+    const fmt = (d?: string | number | Date) => {
+      try {
+        if (!d) return '—';
+        const date = new Date(d);
+        if (isNaN(date.getTime())) return '—';
+        return date.toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: '2-digit' });
+      } catch {
+        return '—';
+      }
+    };
+
+    const load = async () => {
+      try {
+        const [bookingsRes, reviewsRes, favoritesRes] = await Promise.allSettled([
+          listMyBookings(),
+          listMyReviews(),
+          listMyFavorites(),
+        ]);
+
+        const out: Array<{ id: string | number; type: 'rental' | 'review' | 'favorite'; title: string; description: string; date: string; }> = [];
+
+        // Bookings -> rental
+        if (bookingsRes.status === 'fulfilled') {
+          const items = (bookingsRes.value as any)?.items ?? [];
+          for (const b of items.slice(0, 5)) {
+            const boatName = b?.boat?.name || b?.boatName || 'Embarcación';
+            const title = b?.status ? `Reserva ${b.status}` : 'Reserva';
+            const period = (b?.startDate && b?.endDate) ? `${fmt(b.startDate)} – ${fmt(b.endDate)}` : (b?.createdAt ? fmt(b.createdAt) : '—');
+            out.push({
+              id: b?._id || b?.id || `rental-${Math.random()}`,
+              type: 'rental',
+              title,
+              description: `${boatName}${period !== '—' ? ` · ${period}` : ''}`,
+              date: fmt(b?.createdAt || b?.startDate),
+            });
+          }
+        }
+
+        // Reviews -> review
+        if (reviewsRes.status === 'fulfilled') {
+          const items = (reviewsRes.value as any)?.items ?? [];
+          for (const r of items.slice(0, 5)) {
+            const boatName = r?.boatName ? ` · ${r.boatName}` : '';
+            const rating = typeof r?.rating === 'number' ? `⭐ ${r.rating.toFixed(1)}` : '';
+            out.push({
+              id: r?.id || r?._id || `review-${Math.random()}`,
+              type: 'review',
+              title: r?.rating ? `Nueva reseña recibida` : 'Reseña',
+              description: `${rating}${boatName}${r?.comment ? ` · ${r.comment}` : ''}`.trim() || 'Reseña',
+              date: fmt(r?.date || r?.createdAt),
+            });
+          }
+        }
+
+        // Favorites -> favorite
+        if (favoritesRes.status === 'fulfilled') {
+          const items = (favoritesRes.value as any)?.items ?? [];
+          for (const f of items.slice(0, 5)) {
+            const boatName = f?.name || f?.boat?.name || 'Embarcación';
+            out.push({
+              id: f?._id || f?.id || `favorite-${Math.random()}`,
+              type: 'favorite',
+              title: 'Barco añadido a favoritos',
+              description: boatName,
+              date: fmt(f?.createdAt),
+            });
+          }
+        }
+
+        // Ordenar por fecha desc si es posible
+        out.sort((a, b) => {
+          const da = new Date(a.date).getTime();
+          const db = new Date(b.date).getTime();
+          return (isNaN(db) ? 0 : db) - (isNaN(da) ? 0 : da);
+        });
+
+        if (mounted) {
+          // Fallback: si no hay nada, dejar un conjunto breve por defecto
+          if (!out.length) {
+            setRecentActivity([
+              { id: 1, type: 'rental', title: 'Alquiler completado', description: 'Embarcación', date: fmt(new Date()) },
+            ]);
+          } else {
+            setRecentActivity(out.slice(0, 10));
+          }
+        }
+      } catch {
+        if (mounted) {
+          setRecentActivity([
+            { id: 1, type: 'rental', title: 'Alquiler completado', description: 'Embarcación', date: new Date().toLocaleDateString('es-ES') },
+          ]);
+        }
+      }
+    };
+
+    // Solo cargar si el usuario está logueado
+    if (user?._id) load();
+    return () => { mounted = false; };
+  }, [user?._id]);
 
   if (loading) {
     return (
@@ -269,6 +360,11 @@ const Profile = () => {
                       phone: (user.phone ?? ""),
                       dniOrLicense: (user.dniOrLicense ?? ""),
                       experienceDeclaration: (user.experienceDeclaration ?? ""),
+                      timeZone: (user.timeZone ?? ""),
+                      birthDate: (user.birthDate ?? ""),
+                      nationality: (user.nationality ?? ""),
+                      languages: (user.languages ?? ""),
+                      address: (user.address ?? ""),
                     });
                   }
                   setIsEditing((v) => !v);
@@ -390,13 +486,20 @@ const Profile = () => {
                       if (!user?._id) return;
                       try {
                         setSaving(true);
-                        await updateUserAuthorized(user._id, {
+                        const updateData = {
                           firstName: form.firstName,
                           lastName: form.lastName,
                           phone: form.phone,
                           dniOrLicense: form.dniOrLicense,
                           experienceDeclaration: form.experienceDeclaration,
-                        });
+                          timeZone: form.timeZone,
+                          birthDate: form.birthDate,
+                          nationality: form.nationality,
+                          languages: form.languages,
+                          address: form.address,
+                        };
+                        
+                        await updateUserAuthorized(user._id, updateData);
                         await refetch();
                         setIsEditing(false);
                       } catch (err) {
@@ -451,6 +554,51 @@ const Profile = () => {
                         value={form.experienceDeclaration}
                         onChange={(e) => setForm((f) => ({ ...f, experienceDeclaration: e.target.value }))}
                         rows={4}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="timeZone">Zona horaria</Label>
+                      <Input
+                        id="timeZone"
+                        value={form.timeZone}
+                        onChange={(e) => setForm((f) => ({ ...f, timeZone: e.target.value }))}
+                        placeholder="Ej: GMT-3, UTC+1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="birthDate">Fecha de nacimiento</Label>
+                      <Input
+                        id="birthDate"
+                        type="date"
+                        value={form.birthDate}
+                        onChange={(e) => setForm((f) => ({ ...f, birthDate: e.target.value }))}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="nationality">Nacionalidad</Label>
+                      <Input
+                        id="nationality"
+                        value={form.nationality}
+                        onChange={(e) => setForm((f) => ({ ...f, nationality: e.target.value }))}
+                        placeholder="Ej: Española, Argentina"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="languages">Idiomas que domina</Label>
+                      <Input
+                        id="languages"
+                        value={form.languages}
+                        onChange={(e) => setForm((f) => ({ ...f, languages: e.target.value }))}
+                        placeholder="Ej: Español, Inglés, Francés"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <Label htmlFor="address">Domicilio de residencia</Label>
+                      <Input
+                        id="address"
+                        value={form.address}
+                        onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
+                        placeholder="Dirección completa"
                       />
                     </div>
                     <div className="md:col-span-2 flex gap-2 justify-end mt-2">
@@ -571,6 +719,50 @@ const Profile = () => {
                 <div className="flex items-center gap-3">
                   <MapPin size={16} className="text-muted-foreground" />
                   <span className="text-sm">{userProfile.location}</span>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Personal Information */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Información Personal</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <Calendar size={16} className="text-muted-foreground" />
+                  <div>
+                    <div className="text-xs text-muted-foreground">Fecha de nacimiento</div>
+                    <span className="text-sm">{user?.birthDate ? new Date(user.birthDate).toLocaleDateString('es-ES') : "—"}</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <MapPin size={16} className="text-muted-foreground" />
+                  <div>
+                    <div className="text-xs text-muted-foreground">Nacionalidad</div>
+                    <span className="text-sm">{user?.nationality || "—"}</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Settings size={16} className="text-muted-foreground" />
+                  <div>
+                    <div className="text-xs text-muted-foreground">Zona horaria</div>
+                    <span className="text-sm">{user?.timeZone || "—"}</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Mail size={16} className="text-muted-foreground" />
+                  <div>
+                    <div className="text-xs text-muted-foreground">Idiomas</div>
+                    <span className="text-sm">{user?.languages || "—"}</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <MapPin size={16} className="text-muted-foreground" />
+                  <div>
+                    <div className="text-xs text-muted-foreground">Domicilio</div>
+                    <span className="text-sm">{user?.address || "—"}</span>
+                  </div>
                 </div>
               </CardContent>
             </Card>

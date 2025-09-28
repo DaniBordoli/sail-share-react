@@ -14,6 +14,11 @@ export interface UserData {
   password: string;
   dniOrLicense?: string;
   experienceDeclaration?: string;
+  timeZone?: string;
+  birthDate?: string;
+  nationality?: string;
+  languages?: string;
+  address?: string;
 }
 
 export interface User extends Omit<UserData, 'password'> {

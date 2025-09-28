@@ -90,7 +90,7 @@ export const Footer = () => {
                 <Anchor className="h-8 w-8 text-primary" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold">boatbnb</h1>
+                <h1 className="text-2xl font-bold brand-title">boatbnb</h1>
                 <p className="text-sm text-white/80">Tu aventura náutica</p>
               </div>
             </div>

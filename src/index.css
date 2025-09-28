@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom Fonts */
+@font-face {
+  font-family: 'AR Techni';
+  src: url('./assets/fonts/AR Techni.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Samboat-inspired nautical design system - Ocean Blues & Marine Elegance */
 
 @layer base {
@@ -179,6 +188,13 @@
     background: linear-gradient(90deg, transparent, hsl(var(--primary-glow) / 0.3), transparent);
     background-size: 1000px 100%;
     animation: shimmer 3s infinite;
+  }
+
+  /* Brand Title with AR Techni Font */
+  .brand-title {
+    font-family: 'AR Techni', 'Inter', system-ui, -apple-system, sans-serif;
+    font-weight: bold;
+    letter-spacing: -0.025em;
   }
 
   /* Ensure header overlays Leaflet controls inside map picker */
