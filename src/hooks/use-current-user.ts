@@ -9,6 +9,11 @@ export type CurrentUser = {
   phone?: string;
   dniOrLicense?: string;
   experienceDeclaration?: string;
+  timeZone?: string;
+  birthDate?: string;
+  nationality?: string;
+  languages?: string;
+  address?: string;
   googleId?: string;
   facebookId?: string;
   isVerified?: boolean;
@@ -22,6 +27,9 @@ export type CurrentUser = {
   // reputation
   rating?: number;
   ratingCount?: number;
+  // timestamps
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export const useCurrentUser = () => {

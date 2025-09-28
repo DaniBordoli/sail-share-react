@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { MapPin, Star, Users, Ship, Share2, Link as LinkIcon, User, BadgeCheck, Heart, ChevronLeft, ChevronRight } from "lucide-react";
 import heroImage from "@/assets/hero-yacht.jpg";
 import { contactOwner, getBoatById, toggleFavorite, listMyFavorites } from "@/stores/slices/basicSlice";
+import { API_BASE_URL } from "@/lib/api";
 import { mockBoats } from "@/data/mockBoats";
 import { useToast } from "@/components/ui/use-toast";
  
@@ -109,7 +110,7 @@ const BoatDetails = () => {
     queryKey: ['boat-reviews', reviewsId],
     queryFn: async () => {
       if (!reviewsId || !isValidObjectId(reviewsId)) return null as any;
-      const res = await fetch(`/api/boats/${reviewsId}/reviews?page=1&limit=5`);
+      const res = await fetch(`${API_BASE_URL}/api/boats/${reviewsId}/reviews?page=1&limit=5`);
       return res.json();
     },
     enabled: !!reviewsId && isValidObjectId(reviewsId),
@@ -120,7 +121,7 @@ const BoatDetails = () => {
     queryKey: ['boat-conditions', id],
     queryFn: async () => {
       if (!id) return null as any;
-      const res = await fetch(`/api/boats/${id}/conditions`);
+      const res = await fetch(`${API_BASE_URL}/api/boats/${id}/conditions`);
       return res.json();
     },
     enabled: !!id,
