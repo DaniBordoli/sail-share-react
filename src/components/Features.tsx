@@ -1,34 +1,40 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, Clock, Anchor, Star, CreditCard, HeadphonesIcon } from "lucide-react";
+import clockVideo from "@/assets/icons/clock.mp4";
+import shieldVideo from "@/assets/icons/shield.mp4";
+import anchorVideo from "@/assets/icons/anchor.mp4";
+import starVideo from "@/assets/icons/star.mp4";
+import creditcardVideo from "@/assets/icons/creditcard.mp4";
+import headphonesVideo from "@/assets/icons/headphones.mp4";
 
 const features = [
   {
-    icon: Shield,
+    video: shieldVideo,
     title: "Seguro Incluido",
     description: "Todas las reservas incluyen seguro completo para tu tranquilidad durante la navegación"
   },
   {
-    icon: Clock,
+    video: clockVideo,
     title: "Reserva Instantánea",
     description: "Confirma tu barco al instante. Sin esperas, sin complicaciones. Listo para navegar"
   },
   {
-    icon: Anchor,
+    video: anchorVideo,
     title: "+50,000 Embarcaciones",
     description: "La mayor flota de barcos disponible en todo el mundo. Encuentra el perfecto para ti"
   },
   {
-    icon: Star,
+    video: starVideo,
     title: "Capitanes Certificados",
     description: "Patrones profesionales con experiencia y certificaciones oficiales para tu seguridad"
   },
   {
-    icon: CreditCard,
+    video: creditcardVideo,
     title: "Pago Seguro",
-    description: "Procesamiento de pagos encriptado y seguro. Cancela gratis hasta 24h antes"
+    description: "Procesamiento de pagos encriptado y seguro. Cancelagratis hasta 24h antes"
   },
   {
-    icon: HeadphonesIcon,
+    video: headphonesVideo,
     title: "Soporte 24/7",
     description: "Asistencia inmediata durante tu experiencia. Estamos aquí cuando nos necesites"
   }
@@ -62,8 +68,15 @@ export const Features = () => {
               className="group hover:shadow-glow transition-all duration-500 hover:-translate-y-2"
             >
               <CardHeader className="text-center pb-4">
-                <div className="mx-auto w-16 h-16 bg-gradient-ocean rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                  <feature.icon size={32} className="text-white" />
+                <div className="mx-auto w-16 h-16 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 overflow-hidden">
+                  <video 
+                    src={feature.video} 
+                    autoPlay 
+                    loop 
+                    muted 
+                    playsInline
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 <CardTitle className="text-xl font-semibold group-hover:text-primary transition-colors">
                   {feature.title}
