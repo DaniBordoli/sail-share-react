@@ -44,8 +44,7 @@ export const HeroSection = () => {
           muted
           loop
           playsInline
-          preload="metadata"
-          poster={heroImage}
+          preload="auto"
         >
           <source src={heroVideo} type="video/mp4" />
         </video>

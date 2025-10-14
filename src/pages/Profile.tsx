@@ -12,7 +12,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { API_BASE_URL } from "@/lib/api";
-import { updateUserAuthorized, uploadUserAvatar, listMyBookings, listMyReviews, listMyFavorites } from "@/stores/slices/basicSlice";
+import { updateUserAuthorized, uploadUserAvatar, listMyBookings, listMyReviews, listMyFavorites, getMyBoats } from "@/stores/slices/basicSlice";
 import { useCurrentUser } from "@/hooks/use-current-user";
 
 const Profile = () => {
@@ -22,6 +22,9 @@ const Profile = () => {
   const [formError, setFormError] = useState<string | null>(null);
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [completedRentals, setCompletedRentals] = useState(0);
+  const [favoriteBoats, setFavoriteBoats] = useState(0);
+  const [ownedBoats, setOwnedBoats] = useState(0);
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -47,9 +50,9 @@ const Profile = () => {
     avatar: user?.avatar || "/placeholder.svg",
     rating: user?.rating ?? 0,
     reviews: user?.ratingCount ?? 0,
-    completedRentals: 23,
-    favoriteBoats: 8,
-    ownedBoats: 2,
+    completedRentals,
+    favoriteBoats,
+    ownedBoats,
   };
 
   // Subida opcional a Cloudinary si está configurado
@@ -149,10 +152,11 @@ const Profile = () => {
 
     const load = async () => {
       try {
-        const [bookingsRes, reviewsRes, favoritesRes] = await Promise.allSettled([
+        const [bookingsRes, reviewsRes, favoritesRes, myBoatsRes] = await Promise.allSettled([
           listMyBookings(),
           listMyReviews(),
           listMyFavorites(),
+          getMyBoats({ limit: 100 }),
         ]);
 
         const out: Array<{ id: string | number; type: 'rental' | 'review' | 'favorite'; title: string; description: string; date: string; }> = [];
@@ -202,6 +206,28 @@ const Profile = () => {
               description: boatName,
               date: fmt(f?.createdAt),
             });
+          }
+        }
+
+        // Actualizar contadores
+        if (mounted) {
+          // Contar reservas completadas
+          if (bookingsRes.status === 'fulfilled') {
+            const bookings = (bookingsRes.value as any)?.items ?? [];
+            const completed = bookings.filter((b: any) => b?.status === 'confirmed' || b?.status === 'completed').length;
+            setCompletedRentals(completed);
+          }
+
+          // Contar favoritos
+          if (favoritesRes.status === 'fulfilled') {
+            const favorites = (favoritesRes.value as any)?.items ?? [];
+            setFavoriteBoats(favorites.length);
+          }
+
+          // Contar barcos propios
+          if (myBoatsRes.status === 'fulfilled') {
+            const boats = (myBoatsRes.value as any)?.data ?? [];
+            setOwnedBoats(boats.length);
           }
         }
 
