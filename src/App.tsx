@@ -16,6 +16,8 @@ import VerifyEmailHandler from "./pages/VerifyEmailHandler";
 import VerifyEmailError from "./pages/VerifyEmailError";
 import RegisterEmailSent from "./pages/RegisterEmailSent";
 import ListYourBoat from "./pages/ListYourBoat";
+import Destinations from "./pages/Destinations";
+import Help from "./pages/Help";
 import NotFound from "./pages/NotFound";
 import SearchBoats from "./pages/SearchBoats";
 import BoatDetails from "./pages/BoatDetails";
@@ -52,6 +54,8 @@ const App = () => (
           <Route path="/verify-email/error" element={<VerifyEmailError />} />
           <Route path="/register-email-sent" element={<RegisterEmailSent />} />
           <Route path="/list-your-boat" element={<ListYourBoat />} />
+          <Route path="/destinos" element={<Destinations />} />
+          <Route path="/ayuda" element={<Help />} />
           <Route path="/explorar-barcos" element={<SearchBoats />} />
           <Route path="/barcos/:id" element={<BoatDetails />} />
           <Route path="/barcos/:id/reservar" element={<BookingPage />} />

@@ -13,9 +13,9 @@ export const Header = () => {
   const navigation = [
     { name: "Inicio", href: "/" },
     { name: "Explorar Barcos", href: "/explorar-barcos" },
-    { name: "Destinos", href: "#" },
+    { name: "Destinos", href: "/destinos" },
     { name: "Alquila tu Barco", href: "/list-your-boat" },
-    { name: "Ayuda", href: "#" }
+    { name: "Ayuda", href: "/ayuda" }
   ];
 
   const [isAuth, setIsAuth] = useState<boolean>(false);
