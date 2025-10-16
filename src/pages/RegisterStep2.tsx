@@ -96,7 +96,7 @@ const RegisterStep2 = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-subtle">
+    <div className="min-h-screen bg-[#1d687f]">
       <Header />
       <div className="pt-24 pb-16">
         <div className="max-w-md mx-auto px-4">

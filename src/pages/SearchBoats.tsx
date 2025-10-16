@@ -346,7 +346,7 @@ const SearchBoats = () => {
         <Header />
       </div>
 
-      <main className="relative z-10 pt-24 pb-16">
+      <main className="relative z-10 pt-24 pb-16 bg-[#1d687f]">
         <header className="max-w-7xl mx-auto px-4 mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-white">Explorar Barcos</h1>
           <p className="text-white/80 mt-2 max-w-2xl">Explora cientos de embarcaciones para alquilar. Filtra por nombre, destino o tipo.</p>

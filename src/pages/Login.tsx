@@ -139,14 +139,7 @@ const Login = () => {
     <div className="relative min-h-screen isolate">
       {/* Background */}
       <div 
-        className="absolute inset-0 z-0 pointer-events-none select-none"
-        style={{
-          backgroundImage: `url(${heroImage})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
-        }}
-      >
+        className="absolute inset-0 z-0 pointer-events-none select-none bg-[#1d687f]">
         <div className="absolute inset-0 bg-gradient-hero opacity-60 pointer-events-none"></div>
         <div className="absolute inset-0 bg-black/20 pointer-events-none"></div>
       </div>
