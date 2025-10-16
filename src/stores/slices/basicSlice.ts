@@ -552,6 +552,22 @@ export const updateBookingStatus = async (bookingId: string, status: 'confirmed'
   return data as { message: string; booking: any };
 };
 
+// Simular pago exitoso (para desarrollo/testing)
+export const simulatePayment = async (bookingId: string) => {
+  const token = localStorage.getItem('authToken');
+  if (!token) throw new Error('No autenticado');
+  const res = await fetch(`${API_BASE_URL}/api/bookings/${bookingId}/simulate-payment`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data?.message || `Error ${res.status}`);
+  return data as { message: string; booking: any };
+};
+
 // Obtener mis embarcaciones con paginación y orden
 export const getMyBoats = async (params: { page?: number; limit?: number; sort?: string; order?: 'asc'|'desc' } = {}) => {
   const token = localStorage.getItem('authToken');
