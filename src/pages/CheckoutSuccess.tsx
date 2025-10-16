@@ -7,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { CheckCircle2 } from "lucide-react";
-import { updateBookingStatus } from "@/stores/slices/basicSlice";
 
 const CheckoutSuccess = () => {
   const [params] = useSearchParams();
@@ -16,12 +15,12 @@ const CheckoutSuccess = () => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    // Si tenemos bookingId, marcamos como confirmada en el backend
+    // El backend confirma automáticamente la reserva cuando el webhook de Stripe se ejecuta
+    // Solo invalidamos las queries para refrescar los datos
     (async () => {
       try {
+        // Reflejar confirmación en sessionStorage para UI optimista
         if (bookingId) {
-          await updateBookingStatus(bookingId, 'confirmed');
-          // Reflejar confirmación en sessionStorage para UI optimista
           try {
             const raw = sessionStorage.getItem('lastBooking');
             if (raw) {
@@ -35,7 +34,7 @@ const CheckoutSuccess = () => {
           } catch {}
         }
       } catch {}
-      // En cualquier caso, invalidamos para que "Mis reservas" se actualice
+      // Invalidamos para que "Mis reservas" se actualice con el estado real del backend
       try { await queryClient.invalidateQueries({ queryKey: ["my-bookings"] }); } catch {}
     })();
   }, [bookingId, queryClient]);

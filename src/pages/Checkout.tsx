@@ -4,11 +4,33 @@ import { Footer } from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { simulatePayment } from "@/stores/slices/basicSlice";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 const Checkout = () => {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const bookingId = params.get("bookingId") || "";
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
+
+  const handleSimulatePayment = async () => {
+    if (!bookingId) {
+      toast({ title: "Error", description: "No hay ID de reserva", variant: "destructive" });
+      return;
+    }
+    setLoading(true);
+    try {
+      await simulatePayment(bookingId);
+      toast({ title: "Pago simulado exitoso", description: "La reserva ha sido confirmada" });
+      navigate(`/checkout/success?bookingId=${encodeURIComponent(bookingId)}`);
+    } catch (error: any) {
+      toast({ title: "Error al simular pago", description: error?.message || "Intenta nuevamente", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-muted">
@@ -46,9 +68,10 @@ const Checkout = () => {
               <Separator />
               <div className="flex flex-wrap gap-3">
                 <Button
-                  onClick={() => navigate(bookingId ? `/checkout/success?bookingId=${encodeURIComponent(bookingId)}` : "/checkout/success")}
+                  onClick={handleSimulatePayment}
+                  disabled={loading || !bookingId}
                 >
-                  Simular pago exitoso
+                  {loading ? "Procesando..." : "Simular pago exitoso"}
                 </Button>
                 <Button
                   variant="destructive"
