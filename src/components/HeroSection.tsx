@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar, MapPin, Anchor, Users } from "lucide-react";
 import LocationAutocomplete, { LocationSuggestion } from "@/components/LocationAutocomplete";
-import heroImage from "@/assets/hero-yacht.jpg";
+import imageFallback from "@/assets/imagefallback.png";
 import heroVideo from "@/assets/hero-video.mp4";
 
 export const HeroSection = () => {
@@ -45,6 +45,7 @@ export const HeroSection = () => {
           loop
           playsInline
           preload="auto"
+          poster={imageFallback}
         >
           <source src={heroVideo} type="video/mp4" />
         </video>

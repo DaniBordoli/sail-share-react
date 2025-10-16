@@ -345,13 +345,7 @@ const BoatDetails = () => {
     <div className="relative min-h-screen isolate">
       {/* Background */}
       <div 
-        className="absolute inset-0 z-0 pointer-events-none select-none"
-        style={{
-          backgroundImage: `url(${getImg(boat)})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
-        }}
+        className="absolute inset-0 z-0 pointer-events-none select-none bg-[#1d687f]"
       >
         <div className="absolute inset-0 bg-gradient-hero opacity-70 pointer-events-none"></div>
         <div className="absolute inset-0 bg-black/30 pointer-events-none"></div>
@@ -361,7 +355,7 @@ const BoatDetails = () => {
         <Header />
       </div>
 
-      <main className="relative z-10 pt-24 pb-16">
+      <main className="relative z-10 pt-24 pb-16 bg-[#1d687f]">
         <header className="max-w-7xl mx-auto px-4 mb-6">
           <nav className="text-white/80 text-sm mb-2">
             <Link to="/explorar-barcos" className="hover:underline">← Volver a la búsqueda</Link>
