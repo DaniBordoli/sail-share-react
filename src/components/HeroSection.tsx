@@ -38,18 +38,30 @@ export const HeroSection = () => {
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Hero Background (Video) */}
       <div className="absolute inset-0 z-0 overflow-hidden">
-        <video
+      
+        <img
+          src={imageFallback}
+          alt="Fondo de embarcaciones"
           className="absolute inset-0 w-full h-full object-cover"
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="auto"
-          poster={imageFallback}
-        >
-          <source src={heroVideo} type="video/mp4" />
-        </video>
-        <div className="absolute inset-0 bg-black/50"></div>
+          style={{ zIndex: 0 }}
+          draggable={false}
+        />
+      
+        <div className="absolute inset-0 w-full h-full" style={{ zIndex: 1 }}>
+          <video
+            className="w-full h-full object-cover"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            poster={imageFallback}
+            style={{ zIndex: 1 }}
+          >
+            <source src={heroVideo} type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-black/50" style={{ zIndex: 2 }}></div>
+        </div>
         {/* <div className="absolute inset-0 bg-black/20"></div> */}
       </div>
 
