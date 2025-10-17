@@ -211,13 +211,14 @@ export default function OwnerBookings() {
 
       {/* Modal de detalle de reserva */}
       <Dialog open={open} onOpenChange={(v) => { if (!v) { setOpen(false); setSelectedId(null); } }}>
-        <DialogContent>
+       
+        <DialogContent className="max-h-[90vh]">
           <DialogHeader>
             <DialogTitle>Detalle de la reserva</DialogTitle>
             <DialogDescription>Información completa de la reserva seleccionada</DialogDescription>
           </DialogHeader>
           {selected ? (
-            <div className="space-y-3">
+            <div className="space-y-3 max-h-[70vh] overflow-y-auto pr-2">
               <div className="flex items-center gap-3">
                 <div className="w-20 h-20 rounded overflow-hidden bg-gray-100 flex items-center justify-center">
                   {selected?.boat?.photos?.[0] ? (
