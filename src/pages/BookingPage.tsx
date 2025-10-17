@@ -170,7 +170,7 @@ const BookingPage = () => {
     if (!allowedRentalTypes.includes(rentalType)) {
       setRentalType(allowedRentalTypes[0]);
     }
-  }, [allowedRentalTypes]);
+  }, [allowedRentalTypes, rentalType]);
 
   // Prefill from URL params
   useEffect(() => {
@@ -341,7 +341,7 @@ const BookingPage = () => {
     }
   });
 
-  const canSubmit = nights > 0 && isAvailable !== false && guests >= 1 && guests <= (boat?.capacity || Infinity) && phoneValid;
+  const canSubmit = nights > 0 && isAvailable !== false && guests >= 1 && guests <= (boat?.capacity || Infinity) && phoneValid && (!allowedRentalTypes || allowedRentalTypes.includes(rentalType));
 
   return (
     <div className="relative min-h-screen isolate">
@@ -729,6 +729,10 @@ const BookingPage = () => {
                       }
                       if (!confirmAgree) {
                         toast({ title: 'Confirma la información', description: 'Debes aceptar la revisión para continuar', variant: 'destructive' });
+                        return;
+                      }
+                      if (allowedRentalTypes && !allowedRentalTypes.includes(rentalType)) {
+                        toast({ title: 'Tipo de rental no permitido', description: 'Selecciona un tipo de rental válido para este barco', variant: 'destructive' });
                         return;
                       }
                       // Requiere autenticación antes de crear la reserva
