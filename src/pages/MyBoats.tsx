@@ -313,15 +313,27 @@ export default function MyBoats() {
           ) : !user ? (
             <div>Inicia sesión para continuar.</div>
           ) : cannotPublish ? (
-            <Card className="mb-6">
+            <Card className="mb-6 border-amber-500/50 bg-gradient-to-br from-amber-50 to-orange-50">
               <CardHeader>
-                <CardTitle className="text-white">Completa tu perfil antes de publicar</CardTitle>
+                <CardTitle className="text-amber-900 flex items-center gap-2">
+                  <span className="text-2xl">⚠️</span>
+                  Completa tu perfil
+                </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2">
-                {!user.isVerified && <div className="text-sm">• Debes verificar tu correo electrónico.</div>}
-                {profileIncomplete && <div className="text-sm">• Completa tu nombre, apellido y teléfono en tu perfil.</div>}
+              <CardContent className="space-y-3">
+                {!user.isVerified && (
+                  <div className="flex items-start gap-2 text-sm text-amber-800 bg-amber-100 p-3 rounded-lg">
+                    <span className="text-lg">📧</span>
+                    <span>Debes verificar tu correo electrónico.</span>
+                  </div>
+                )}
+                {profileIncomplete && (
+                  <div className="flex gap-2 text-sm text-amber-800 bg-amber-100 p-3 rounded-lg">
+                    <span>Completa tu perfil con tu nombre, apellido y teléfono para empezar a cargar tus embarcaciones.</span>
+                  </div>
+                )}
                 <div className="pt-2">
-                  <Button asChild>
+                  <Button asChild className="bg-gradient-ocean hover:opacity-90">
                     <a href="/profile">Ir a mi perfil</a>
                   </Button>
                 </div>
@@ -360,7 +372,7 @@ export default function MyBoats() {
                     </SelectContent>
                   </Select>
                 </div>
-                <Button className="w-full sm:w-auto" onClick={() => { setFormOpen(true); setEditId(null); setExistingPhotos([]); setPhotosFiles([]); setForm({ name: '', rentalTypes: [], boatType: '', brand: '', model: '', buildYear: '', capacity: '', enginePower: '', length: '', contactNumber: '', city: '', description: '', price: '', priceUnit: 'day' }); }}>Agregar embarcación</Button>
+                <Button className="w-full sm:w-auto" onClick={() => { setFormOpen(true); setEditId(null); setExistingPhotos([]); setPhotosFiles([]); setForm({ name: '', rentalTypes: [], boatType: '', brand: '', model: '', buildYear: '', capacity: '', enginePower: '', length: '', contactNumber: user?.phone || '', city: '', description: '', price: '', priceUnit: 'day' }); }}>Agregar embarcación</Button>
               </div>
 
               <Card>
@@ -515,6 +527,7 @@ export default function MyBoats() {
                       <div className="md:col-span-2">
                         <Label>Número de contacto de la publicación</Label>
                         <Input value={form.contactNumber} onChange={(e)=>setForm((f:any)=>({...f, contactNumber:e.target.value}))} placeholder="Ej: +34 600 000 000" />
+                        <p className="text-xs text-muted-foreground mt-1">Se completó automáticamente con tu teléfono. Puedes modificarlo si lo deseas.</p>
                       </div>
 
                       <div className="md:col-span-2">

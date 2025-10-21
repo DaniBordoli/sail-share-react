@@ -337,14 +337,18 @@ const Profile = () => {
                     </Badge>
                   )}
                   {user?.licenseStatus === 'rejected' && (
-                    <Badge className="bg-red-600 text-white border-red-600">
-                      Licencia rechazada
-                    </Badge>
+                    <Link to="/profile/validation">
+                      <Badge className="bg-red-600 text-white border-red-600 cursor-pointer hover:bg-red-700 transition-colors">
+                        Licencia rechazada
+                      </Badge>
+                    </Link>
                   )}
                   {user?.licenseStatus === 'none' && (
-                    <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
-                      Licencia no cargada
-                    </Badge>
+                    <Link to="/profile/validation">
+                      <Badge variant="secondary" className="bg-white/20 text-white border-white/30 cursor-pointer hover:bg-white/30 transition-colors">
+                        Licencia no cargada
+                      </Badge>
+                    </Link>
                   )}
                   {user?.phoneVerified && (
                     <Badge className="bg-green-600 text-white border-green-600 flex items-center gap-1">
@@ -410,7 +414,7 @@ const Profile = () => {
       {/* Content wrapper with muted background (like Admin Panel) */}
       <div className="bg-muted">
       {/* Quick Actions - prominent bar */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${isEditing ? 'hidden md:block' : ''}`}>
 
         <div className="-mt-6">
           <Card className="border-0 shadow-md">
